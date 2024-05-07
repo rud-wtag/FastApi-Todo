@@ -1,0 +1,60 @@
+@use 'styles/abstracts/variables' as *;
+@use 'styles/abstracts/mixin' as *;
+
+.btn {
+  border-radius: 0.3125rem;
+  cursor: pointer;
+
+  &-primary {
+    background: $color-white;
+    padding: 0.5625rem 0.8125rem;
+    border: 1px solid #dde2ff;
+
+    &--dark {
+      background: black;
+      color: $color-white;
+    }
+  }
+
+  &-secondary {
+    background: $color-primary;
+    padding: 0.3125rem 0.75rem;
+    border: none;
+    color: $color-white;
+  }
+
+  &-icon {
+    border: none;
+    background: $color-white;
+
+    svg {
+      height: 1.5rem;
+      width: 1.5rem;
+      background: $color-white;
+    }
+  }
+}
+
+.grid {
+  display: grid;
+}
+
+.grid-cols-lg-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-gap {
+  gap: 2.125rem;
+}
+
+@include respond($breakpoint-md) {
+  .grid-cols-md-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@include respond($breakpoint-sm) {
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}

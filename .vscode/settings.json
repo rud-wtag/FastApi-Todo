@@ -1,0 +1,17 @@
+{
+  "workbench.colorTheme": "Default Dark+",
+
+  "editor.fontSize": 14,
+
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+
+  "ruff.organizeImports": true,
+  "ruff.lint.args": ["--config=backend/.ruff.toml"]
+}

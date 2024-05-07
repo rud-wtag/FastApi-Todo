@@ -1,0 +1,16 @@
+@use 'styles/abstracts/mixin' as *;
+
+.no_task {
+  flex-direction: column;
+  margin-top: 8.125rem;
+  justify-content: flex-start;
+  @include flexCenter;
+
+  &__text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    @include respond(phone) {
+      font-size: 0.8rem;
+    }
+  }
+}

@@ -1,0 +1,27 @@
+@use 'styles/abstracts/mixin' as *;
+
+.loader {
+  &_backdrop {
+    @include flexCenter;
+    position: absolute;
+    top: 4.5rem;
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 4.5rem);
+    background: #bfccf05e;
+  }
+
+  width: 6.25rem;
+  height: 6.25rem;
+  background: url(../../assets/loader.svg) no-repeat center;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

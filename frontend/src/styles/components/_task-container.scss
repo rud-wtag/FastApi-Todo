@@ -1,0 +1,9 @@
+@use 'styles/abstracts' as *;
+
+.task_container {
+  &__more_btn {
+    display: flex;
+    margin-inline: auto;
+    margin-top: 3.5625rem;
+  }
+}
