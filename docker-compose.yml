@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: docker/appserver/Dockerfile
+    container_name: fast_api
     command: "uvicorn app.main:app --reload --host 0.0.0.0 --port 80"
     volumes:
       - ./backend:/app
@@ -12,11 +13,14 @@ services:
       - 8000:80
     depends_on:
       - db
+    networks:
+      - fast_api
 
   node:
     build:
       context: .
       dockerfile: docker/node/Dockerfile
+    container_name: node
     command: "npm run start"
     volumes:
       - ./frontend:/app
@@ -30,13 +34,40 @@ services:
     build:
       context: .
       dockerfile: docker/pgsql/Dockerfile
+    container_name: postgresql
+    volumes:
+      - psql_volume:/var/lib/postgresql/data
+    networks:
+      - fast_api
+
+  smtp-service:
+    image: axllent/mailpit
+    restart: unless-stopped
+    container_name: smtp
+    networks:
+      - fast_api
+    ports:
+      - "8025:8025"
+      - "1025:1025"
 
   pgadmin:
     build:
       context: .
       dockerfile: docker/pgadmin/Dockerfile
+    container_name: pgadmin
+    volumes:
+      - pgadmin_volume:/var/lib/pgadmin
     ports:
       - "5050:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@domain.com
       PGADMIN_DEFAULT_PASSWORD: admin
+    networks:
+      - fast_api
+
+volumes:
+  pgadmin_volume:
+  psql_volume:
+
+networks:
+  fast_api:
