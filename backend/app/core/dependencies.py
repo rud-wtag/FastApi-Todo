@@ -51,3 +51,13 @@ def active_user(user: dict = Depends(get_current_user)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="You are not an active user",
         )
+
+
+def email_verified(user: dict = Depends(get_current_user)):
+    if user["is_email_verified"] is not None and user["is_email_verified"] == True:
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Your email is not verified please verify you email first",
+        )
