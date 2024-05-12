@@ -55,6 +55,7 @@ async def login_for_access_token(
 async def profile(
     user: AuthInterface = Depends(get_current_user),
 ):
+    user.pop("token_type")
     response = JSONResponse(user)
     return response
 

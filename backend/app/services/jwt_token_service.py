@@ -108,8 +108,9 @@ class JWTTokenService(JWTTokenInterface):
             )
 
         return {
-            "username": username,
             "id": user_id,
+            "username": username,
+            "full_name": user.full_name,
             "role": user.role.name,
             "token_type": token_type,
         }
