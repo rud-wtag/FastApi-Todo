@@ -24,6 +24,11 @@ class CreateUserRequest(BaseUser):
     }
 
 
+class ProfileUpdateRequest(BaseModel):
+    full_name: str | None = Field(default=None)
+    username: EmailStr | None = Field(default=None)
+
+
 class User(ModelBaseInfo, BaseUser):
     pass
 

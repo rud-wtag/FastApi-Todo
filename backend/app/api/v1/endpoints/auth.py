@@ -6,7 +6,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core.dependencies import get_current_user
 from app.interface.user_registration_interface import UserRegistrationInterface
-from app.schema.auth_schema import CreateUserRequest, CreateUserResponse
+from app.schema.auth_schema import (
+    CreateUserRequest,
+    CreateUserResponse,
+    ProfileUpdateRequest,
+)
 from app.services.auth_service import AuthInterface, AuthService
 from app.services.jwt_token_service import JWTTokenInterface, JWTTokenService
 from app.services.user_registration_service import (
@@ -51,6 +55,16 @@ async def profile(
     user.pop("token_type")
     response = JSONResponse(user)
     return response
+
+
+@router.post("/update-profile", response_model=CreateUserResponse)
+async def update_profile(
+    profile_update_request: ProfileUpdateRequest,
+    user: AuthInterface = Depends(get_current_user),
+    auth_service: AuthInterface = Depends(AuthService),
+):
+    updated_user = auth_service.profile_update(user["id"], profile_update_request)
+    return updated_user
 
 
 @router.get("/send-verification-email")
