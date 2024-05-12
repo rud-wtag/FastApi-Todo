@@ -40,10 +40,10 @@ async def login_for_access_token(
     tokens = auth_service.login(form_data.username, form_data.password)
     response = JSONResponse({"msg": "Logged in successfully"})
     response.set_cookie(
-        key="access_token", value=tokens["access_token"], httponly=True, secure=True
+        key="access_token", value=tokens["access_token"], httponly=True, secure=True, samesite = 'none'
     )
     response.set_cookie(
-        key="refresh_token", value=tokens["refresh_token"], httponly=True, secure=True
+        key="refresh_token", value=tokens["refresh_token"], httponly=True, secure=True, samesite = 'none'
     )
     return response
 
