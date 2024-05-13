@@ -77,7 +77,7 @@ class UserRegistrationService(UserRegistrationInterface):
             email, user.id, timedelta(minutes=30), RESET_PASSWORD_TOKEN
         )
 
-        url = f"{settings.app.frontend_url}/api/v1/auth/reset-password?token={token}"
+        url = f"{settings.app.frontend_url}/reset-password?token={token}"
 
         mail.send_email_background(
             self.background_tasks,

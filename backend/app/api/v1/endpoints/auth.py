@@ -13,10 +13,7 @@ from app.schema.auth_schema import (
 )
 from app.services.auth_service import AuthInterface, AuthService
 from app.services.jwt_token_service import JWTTokenInterface, JWTTokenService
-from app.services.user_registration_service import (
-    UserRegistrationService,
-    user_registration_service,
-)
+from app.services.user_registration_service import UserRegistrationService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -40,10 +37,18 @@ async def login_for_access_token(
     tokens = auth_service.login(form_data.username, form_data.password)
     response = JSONResponse({"msg": "Logged in successfully"})
     response.set_cookie(
-        key="access_token", value=tokens["access_token"], httponly=True, secure=True, samesite = 'none'
+        key="access_token",
+        value=tokens["access_token"],
+        httponly=True,
+        secure=True,
+        samesite="none",
     )
     response.set_cookie(
-        key="refresh_token", value=tokens["refresh_token"], httponly=True, secure=True, samesite = 'none'
+        key="refresh_token",
+        value=tokens["refresh_token"],
+        httponly=True,
+        secure=True,
+        samesite="none",
     )
     return response
 
@@ -106,6 +111,9 @@ async def refresh_token(
 @router.post("/send-password-reset-link")
 async def password_reset_link(
     email: Annotated[str, Form()],
+    user_registration_service: UserRegistrationInterface = Depends(
+        UserRegistrationService
+    ),
 ):
     user_registration_service.send_reset_password_link(email)
     response = JSONResponse({"msg": "Password reset successful"})
