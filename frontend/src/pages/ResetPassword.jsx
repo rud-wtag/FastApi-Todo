@@ -6,8 +6,12 @@ import TextField from '@mui/material/TextField';
 import ToastContainer from 'components/ToastContainer';
 import Heading from 'components/Heading';
 import { ReactComponent as Logo } from 'assets/logo.svg';
+import { toast } from 'redux/actions/TodoAction';
+import { TOAST_TYPE_SUCCESS } from 'utils/constants';
+import { useDispatch } from 'react-redux';
 
 export default function ResetPassword() {
+  const dispatch = useDispatch();
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const search = useLocation().search;
@@ -25,6 +29,7 @@ export default function ResetPassword() {
         console.log(response, response.status);
         if (response.status == 200) {
           navigate('/sign-in');
+          dispatch(toast({ type: TOAST_TYPE_SUCCESS, message: 'Password reset successful' }));
         }
       })
       .catch((error) => {

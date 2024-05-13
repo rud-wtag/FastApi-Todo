@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import axios from 'axios';
 import Button from '@mui/material/Button';
 import Popover from '@mui/material/Popover';
@@ -6,10 +6,10 @@ import PopupState, { bindTrigger, bindPopover } from 'material-ui-popup-state';
 import { ReactComponent as UserIcon } from 'assets/user.svg';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { setLoggedIn } from 'redux/actions/AppAction';
+import { setLoggedIn, setProfile } from 'redux/actions/AppAction';
 
 export default function Profile() {
-  const [profile, setProfile] = useState({});
+  const profile = useSelector((state) => state.appStates.profile);
   const isLoggedIn = useSelector((state) => state.appStates.isLoggedIn);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ export default function Profile() {
       .get('/auth/profile')
       .then((response) => {
         if (response.status === 200) {
-          setProfile(response.data);
+          dispatch(setProfile(response.data));
           dispatch(setLoggedIn(true));
         }
       })
@@ -66,16 +66,27 @@ export default function Profile() {
             {isLoggedIn ? (
               <div className="profile__container">
                 {profile.username}
-                <Button onClick={(e) => logout(e)} color="error">
-                  Logout
-                </Button>
+                <div className="profile__container-btns">
+                  <Button onClick={(e) => logout(e)} color="error">
+                    Logout
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      navigate('/profile', { replace: true, state: { from: location } })
+                    }
+                  >
+                    Profile
+                  </Button>
+                </div>
               </div>
             ) : (
-              <Button
-                onClick={() => navigate('/sign-in', { replace: true, state: { from: location } })}
-              >
-                SignIn
-              </Button>
+              <div>
+                <Button
+                  onClick={() => navigate('/sign-in', { replace: true, state: { from: location } })}
+                >
+                  SignIn
+                </Button>
+              </div>
             )}
           </Popover>
         </div>

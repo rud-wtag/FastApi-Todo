@@ -1,51 +1,44 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { ReactComponent as Logo } from 'assets/logo.svg';
-import { setLoggedIn } from 'redux/actions/AppAction';
 import ToastContainer from 'components/ToastContainer';
 import Heading from 'components/Heading';
-import { Box } from '@mui/material';
 import { toast } from 'redux/actions/TodoAction';
-import { TOAST_TYPE_ERROR } from 'utils/constants';
+import { TOAST_TYPE_SUCCESS } from 'utils/constants';
 
-export default function SignIn() {
+export default function SendResetLink() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const submitHandler = (e) => {
     e.preventDefault();
     let formData = new FormData();
-    formData.append('username', email);
-    formData.append('password', password);
+    formData.append('email', email);
 
     axios
-      .post('/auth/login', formData)
+      .post('/auth/send-password-reset-link', formData)
       .then((response) => {
-        console.log(response, response.status);
         if (response.status == 200) {
-          dispatch(setLoggedIn(true));
-          navigate('/');
+          dispatch(toast({ type: TOAST_TYPE_SUCCESS, message: 'Reset email sent successfully' }));
         }
       })
       .catch((error) => {
-        dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Invalid credentials' }));
         console.log(error);
       });
   };
   return (
     <>
       <Heading />
-      <ToastContainer />
       <div className="sign-in">
+        <ToastContainer />
         <div className="logo">
           <Logo />
-          <div className="label">Sign In</div>
+          <div className="label">Forget password</div>
         </div>
         <div className="sign-in__container">
           <TextField
@@ -57,27 +50,14 @@ export default function SignIn() {
             fullWidth="true"
             label="Username"
           />
-          <TextField
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
-            variant="outlined"
-            size="small"
-            fullWidth="true"
-            label="Password"
-            type="password"
-          />
           <Button
             onClick={(e) => {
               submitHandler(e);
             }}
             variant="outlined"
           >
-            Sign In
+            Send reset link
           </Button>
-          <Box sx={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-            <p>Forget Password?</p> <Link to="/send-reset-link">Click here</Link>
-          </Box>
         </div>
       </div>
     </>

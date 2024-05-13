@@ -6,6 +6,7 @@ import { ReactComponent as SearchIcon } from 'assets/search.svg';
 import { ReactComponent as Logo } from 'assets/logo.svg';
 import { setSearch, setSearching } from 'redux/actions/SearchAction';
 import Profile from 'components/Profile';
+import { Link } from 'react-router-dom';
 
 export default function Heading() {
   const [inputHidden, setInputHidden] = useState(true);
@@ -38,12 +39,14 @@ export default function Heading() {
 
   return (
     <div className="header container">
-      <div className="header__left">
-        <div className="header__logo">
-          <Logo />
+      <Link to="/">
+        <div className="header__left">
+          <div className="header__logo">
+            <Logo />
+          </div>
+          <div className="header__brand">Todos</div>
         </div>
-        <div className="header__brand">Todos</div>
-      </div>
+      </Link>
       <div className="header__right">
         <input onChange={onSearch} type="text" className={inputClasses} />
         <Button variant="icon" onClick={onSearchClick}>

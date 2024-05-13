@@ -6,11 +6,14 @@ import SignIn from 'pages/SignIn';
 import store from 'redux/store';
 import 'styles/style.scss';
 import SignUp from 'pages/SignUp';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setLoggedIn, setProfile } from 'redux/actions/AppAction';
 import { useEffect } from 'react';
 import ProtectedRoute from 'components/AuthRequired';
 import ResetPassword from 'pages/ResetPassword';
+import FullProfile from 'components/FullProfile';
+import UpdateProfile from 'pages/UpdateProfile';
+import SendResetLink from 'pages/SendResetLink';
 
 axios.defaults.baseURL = 'http://127.0.0.1:8000/api/v1';
 axios.defaults.withCredentials = true;
@@ -35,11 +38,24 @@ const router = createBrowserRouter([
   {
     path: 'reset-password',
     element: <ResetPassword />
+  },
+  {
+    path: 'profile',
+    element: <FullProfile />
+  },
+  {
+    path: 'update-profile',
+    element: <UpdateProfile />
+  },
+  {
+    path: 'send-reset-link',
+    element: <SendResetLink />
   }
 ]);
 
 function App() {
   const dispatch = useDispatch();
+  const isLoggedIn = useSelector((state) => state.appStates.isLoggedIn);
 
   useEffect(() => {
     axios
@@ -54,6 +70,8 @@ function App() {
         console.log(error);
       });
   }, []);
+
+  useEffect(() => {}, [isLoggedIn]);
 
   return (
     <RouterProvider router={router} /> // RouterProvider should be wrapped inside the Provider
