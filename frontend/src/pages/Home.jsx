@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import BottomNav from 'components/BottomNav';
-import Heading from 'components/Heading';
+import ToastContainer from 'components/ToastContainer';
 import TaskContainer from 'components/TaskContainer';
+import Heading from 'components/Heading';
 import Loader from 'components/ui/Loader';
-import Toast from 'components/ui/Toast';
 import { loadTasksFromDB, toast } from 'redux/actions/TodoAction';
 import supabase from 'supabase';
-import ToastContainer from 'components/ToastContainer';
 
 function Home() {
   const isSearching = useSelector((state) => state.searchStates.searching);
@@ -38,10 +37,9 @@ function Home() {
         <div>loading....</div>
       ) : (
         <>
+          {isSearching && <Loader />}
           <ToastContainer />
           <Heading />
-          {isSearching && <Loader />}
-          <Toast />
           <BottomNav />
           <TaskContainer />
         </>
