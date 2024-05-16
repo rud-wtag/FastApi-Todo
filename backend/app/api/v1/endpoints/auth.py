@@ -153,6 +153,12 @@ async def change_password(
         access_token, new_password, old_password, user
     )
     response = JSONResponse({"msg": "Password reset successful"})
+    response.delete_cookie(
+        key="access_token", samesite="none", secure=True, httponly=True
+    )
+    response.delete_cookie(
+        key="refresh_token", samesite="none", secure=True, httponly=True
+    )
     return response
 
 
