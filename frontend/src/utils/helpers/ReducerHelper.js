@@ -9,10 +9,10 @@ export const deleteTask = (todos, payload) => {
 
 export const completeTask = (todos, payload) => {
   const newList = todos.map((todo) => {
-    if (todo.id === payload.taskId) {
+    if (todo.id === payload.id) {
       return {
         ...todo,
-        completedAt: payload.completedAt
+        ...payload
       };
     }
     return todo;
@@ -22,10 +22,10 @@ export const completeTask = (todos, payload) => {
 
 export const editTask = (todos, task) => {
   const newList = todos.map((todo) => {
-    if (todo.id === task.taskId) {
+    if (todo.id === task.id) {
       return {
         ...todo,
-        title: task.title
+        ...task
       };
     }
     return todo;

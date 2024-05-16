@@ -31,7 +31,7 @@ class TaskService:
             tasks = tasks.filter(Task.category == category)
         if status:
             tasks = tasks.filter(Task.status == status)
-        return paginate(tasks.order_by(Task.id.asc()).all())
+        return paginate(tasks.order_by(Task.created_at.desc()).all())
 
     def get_all_tasks_by_user(self, user: dict):
         return (
@@ -78,11 +78,21 @@ class TaskService:
         self.db.commit()
         return {"message": "Task deleted successfully"}
 
-    # def manage(self,task_id: int, status: bool, user: dict):
-    #     task = self.db.query(Task).filter(Task.id == task_id)
+    def mark_as_complete(self, task_id: int, user: dict):
+        task = self.db.query(Task).filter(Task.id == task_id, Task.user_id == user["id"]).first()
 
-    #     if status is not None:
-    #         task.status =
+        if task is not None:
+            task.status = True
+            task.updated_at = datetime.now()
+            task.completed_at = datetime.now()
+            self.db.commit()
+            self.db.refresh(task)
+            return task
+        
+        raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Task not Found",
+            )
 
     async def search_tasks(
         self,

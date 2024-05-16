@@ -6,8 +6,8 @@ import { editTodo, setEditMode } from 'redux/actions/TodoAction';
 function EditTask({ task }) {
   const dispatch = useDispatch();
 
-  function onSubmit(title) {
-    dispatch(editTodo({ taskId: task.id, title }));
+  function onSubmit(title, description, due_date, priority_level, category) {
+    dispatch(editTodo(task.id, { title, description, due_date, priority_level, category }));
     dispatch(setEditMode({ taskId: task.id, isEditMode: false }));
   }
 

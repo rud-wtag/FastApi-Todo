@@ -56,14 +56,13 @@ def update_task(
     return task_service.update_task(current_user, task_id, update_task_request)
 
 
-# @router.put("/tasks/{task_id}/manage")
-# def mark_as_complete(
-#     task_id,
-#     status: Annotated[str, Form()],
-#     current_user: User = Depends(get_current_user),
-#     task_service: TaskService = Depends(TaskService),
-# ):
-#     return task_service.update_task(current_user, task_id)
+@router.put("/tasks/{task_id}/complete")
+def mark_as_complete(
+    task_id,
+    current_user: User = Depends(get_current_user),
+    task_service: TaskService = Depends(TaskService),
+):
+    return task_service.mark_as_complete(task_id, current_user)
 
 
 @router.delete("/tasks/{task_id}")

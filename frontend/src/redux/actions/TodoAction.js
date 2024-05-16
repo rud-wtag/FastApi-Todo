@@ -1,62 +1,75 @@
 import { v4 as uuidv4 } from 'uuid';
 import { actionTypes } from 'redux/constants/ActionTypes';
 import supabase from 'supabase';
-import { INITIAL_TASK } from 'utils/constants';
+import { INITIAL_TASK, TOAST_TYPE_ERROR } from 'utils/constants';
+import axios from 'axios';
 
-export const addTodo = (title) => {
+export const addTodo = (title, description, due_date, priority_level, category) => {
   return async (dispatch) => {
     const task = {
-      id: uuidv4(),
       title,
+      description,
+      due_date,
+      priority_level,
+      category,
       createdAt: new Date().toISOString()
     };
 
-    const { error } = await supabase.from('todos').insert([task]).select();
-
-    if (!error) {
-      dispatch({
-        type: actionTypes.ADD_TODO,
-        payload: {
-          ...INITIAL_TASK,
-          ...task
-        }
+    axios
+      .post('/tasks', task)
+      .then((res) => {
+        if (res.status == 200)
+          dispatch({
+            type: actionTypes.ADD_TODO,
+            payload: {
+              ...INITIAL_TASK,
+              ...task
+            }
+          });
+        dispatch(toast({ type: 'success', message: 'Task added successfully' }));
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Failed to add task' }));
       });
-      dispatch(toast({ type: 'success', message: 'Task added successfully' }));
-    } else {
-      dispatch(toast({ type: 'danger', message: 'Failed to add task' }));
-    }
   };
 };
 
-export const editTodo = (task) => {
+export const editTodo = (task_id, updated_task) => {
   return async (dispatch) => {
-    const { error } = await supabase
-      .from('todos')
-      .update({ title: task.title })
-      .eq('id', task.taskId)
-      .select();
-    if (!error) {
-      dispatch({
-        type: actionTypes.EDIT_TODO,
-        payload: task
+    axios
+      .put(`/tasks/${task_id}`, updated_task)
+      .then((res) => {
+        if (res.status == 200)
+          dispatch({
+            type: actionTypes.EDIT_TODO,
+            payload: res.data
+          });
+        dispatch(toast({ type: 'success', message: 'Task updated successfully' }));
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Failed to update task' }));
       });
-      dispatch(toast({ type: 'success', message: 'Task updated successfully' }));
-    } else {
-      dispatch(toast({ type: 'danger', message: 'Failed to add task' }));
-    }
   };
 };
 
 export const deleteTodo = (todoId) => {
   return async (dispatch) => {
-    const { error } = await supabase.from('todos').delete().eq('id', todoId);
-    if (!error) {
-      dispatch({
-        type: actionTypes.DELETE_TODO,
-        payload: todoId
+    axios
+      .delete(`/tasks/${todoId}`)
+      .then((res) => {
+        if (res.status == 200)
+          dispatch({
+            type: actionTypes.DELETE_TODO,
+            payload: todoId
+          });
+        dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Task deleted' }));
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Failed to delete task' }));
       });
-      dispatch(toast({ type: 'danger', message: 'Task deleted' }));
-    }
   };
 };
 
@@ -69,20 +82,20 @@ export const setIsNewTaskRequested = (isNewTaskRequested) => {
 
 export const setTodoComplete = (taskId) => {
   return async (dispatch) => {
-    const { error } = await supabase
-      .from('todos')
-      .update({ completedAt: new Date() })
-      .eq('id', taskId)
-      .select();
-    if (!error) {
-      dispatch({
-        type: actionTypes.COMPLETE_TASK,
-        payload: { taskId: taskId, completedAt: new Date() }
+    axios
+      .put(`/tasks/${taskId}/complete`)
+      .then((res) => {
+        if (res.status == 200)
+          dispatch({
+            type: actionTypes.COMPLETE_TASK,
+            payload: res.data
+          });
+        dispatch(toast({ type: 'success', message: 'task completed' }));
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Failed to update task' }));
       });
-      dispatch(toast({ type: 'success', message: 'task completed' }));
-    } else {
-      dispatch(toast({ type: 'danger', message: error.message }));
-    }
   };
 };
 
