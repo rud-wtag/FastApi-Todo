@@ -25,7 +25,6 @@ export default function UpdateProfile() {
     axios
       .post('/auth/update-profile', { username: email, full_name: fullName })
       .then((response) => {
-        console.log(response, response.status);
         if (response.status == 200) {
           dispatch(toast({ type: TOAST_TYPE_SUCCESS, message: 'Profile updated!' }));
           dispatch(setProfile(response.data));

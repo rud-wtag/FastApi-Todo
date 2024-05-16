@@ -47,7 +47,9 @@ export default function FullProfile() {
             </CardContent>
             <Box sx={{ display: 'flex', gap: '1rem' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
-                <Button variant="outlined">Reset password</Button>
+                <Link to="/change-password">
+                  <Button variant="outlined">Change password</Button>
+                </Link>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
                 <Link to="/update-profile">

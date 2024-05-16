@@ -5,9 +5,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
   const isLoggedIn = useSelector((state) => state.appStates.isLoggedIn);
-  useEffect(() => {
-    console.log('route_mounted====', isLoggedIn);
-  }, [isLoggedIn]);
+  useEffect(() => {}, [isLoggedIn]);
   let location = useLocation();
 
   if (!isLoggedIn) {

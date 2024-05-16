@@ -27,7 +27,6 @@ export default function SignIn() {
     axios
       .post('/auth/login', formData)
       .then((response) => {
-        console.log(response, response.status);
         if (response.status == 200) {
           dispatch(setLoggedIn(true));
           navigate('/');

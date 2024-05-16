@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -13,7 +12,6 @@ import { TOAST_TYPE_SUCCESS } from 'utils/constants';
 export default function SendResetLink() {
   const [email, setEmail] = useState('');
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const submitHandler = (e) => {
     e.preventDefault();

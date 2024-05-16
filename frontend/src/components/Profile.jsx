@@ -20,9 +20,7 @@ export default function Profile() {
     axios
       .get('/auth/logout')
       .then((res) => {
-        console.log(res);
         if (res.status == 200) {
-          console.log(res.status);
           dispatch(setLoggedIn(false));
         }
       })
