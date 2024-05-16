@@ -139,6 +139,29 @@ async def password_reset(
     return response
 
 
+@router.post("/change-password")
+async def change_password(
+    old_password: Annotated[str, Form()],
+    new_password: Annotated[str, Form()],
+    user: dict = Depends(get_current_user),
+    access_token=Cookie(None),
+    user_registration_service: UserRegistrationInterface = Depends(
+        UserRegistrationService
+    ),
+):
+    user_registration_service.change_password(
+        access_token, new_password, old_password, user
+    )
+    response = JSONResponse({"msg": "Password reset successful"})
+    response.delete_cookie(
+        key="access_token", samesite="none", secure=True, httponly=True
+    )
+    response.delete_cookie(
+        key="refresh_token", samesite="none", secure=True, httponly=True
+    )
+    return response
+
+
 @router.get("/logout")
 async def logout(
     user: dict = Depends(get_current_user),
