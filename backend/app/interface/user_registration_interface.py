@@ -4,7 +4,7 @@ from fastapi import Request
 
 
 class UserRegistrationInterface(ABC):
-    """User registration interface to implement authentication"""
+    """User registration interface to manage user credentials"""
 
     @abstractmethod
     def send_verification_mail(self, email: str, id: str):
@@ -13,7 +13,7 @@ class UserRegistrationInterface(ABC):
 
     @abstractmethod
     def verify_email(self, token: str, request: Request):
-        """verify function that will implement child class"""
+        """verify email function that will implement child class"""
         pass
 
     @abstractmethod
@@ -24,4 +24,9 @@ class UserRegistrationInterface(ABC):
     @abstractmethod
     def reset_password(self, token: str, new_password: str):
         """reset password function that will implement child class"""
+        pass
+
+    @abstractmethod
+    def change_password(self, token: str, new_password: str, old_password: str):
+        """change password function that will implement child class"""
         pass

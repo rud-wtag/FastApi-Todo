@@ -5,14 +5,18 @@ from sqlalchemy.orm import Session
 from starlette.background import BackgroundTasks
 
 from app.core.config import settings
-from app.core.constants import EMAIL_VERIFICATION_TOKEN, RESET_PASSWORD_TOKEN
+from app.core.constants import (
+    ACCESS_TOKEN,
+    EMAIL_VERIFICATION_TOKEN,
+    RESET_PASSWORD_TOKEN,
+)
 from app.core.database import get_db
 from app.core.mail import mail
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.interface.user_registration_interface import UserRegistrationInterface
 from app.models.user import User
 from app.services.jwt_token_service import JWTTokenService
-from app.utils.helpers import get_hashed_password, get_html
+from app.utils.helpers import get_hashed_password, get_html, verify_password
 
 
 class UserRegistrationService(UserRegistrationInterface):
@@ -104,6 +108,26 @@ class UserRegistrationService(UserRegistrationInterface):
                 return True
 
         return False
+
+    def change_password(
+        self, token: str, new_password: str, old_password: str, user: dict
+    ):
+        user_model = self.db.query(User).filter(User.id == user["id"]).first()
+
+        if not verify_password(old_password, user_model.password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Your old password didn't matched",
+            )
+
+        if user["token_type"] == ACCESS_TOKEN:
+            user_model.password = get_hashed_password(new_password)
+            self.db.commit()
+            self.db.refresh(user_model)
+            # self.jwt_token_service.blacklist_token(user["id"], token)
+            return True
+
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, details="Invalid token")
 
 
 user_registration_service = UserRegistrationService()
