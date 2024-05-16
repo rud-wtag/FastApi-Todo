@@ -1,10 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_pagination import add_pagination
 
-from app.api.v1.routes import auth_router
+from app.api.v1.routes import routers
 from app.core.config import settings
 
 app = FastAPI()
+add_pagination(app)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -13,4 +16,4 @@ app.add_middleware(
     allow_headers=settings.cors.headers,
 )
 
-app.include_router(auth_router, prefix="/api/v1")
+app.include_router(routers, prefix="/api/v1")

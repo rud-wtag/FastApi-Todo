@@ -7,6 +7,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from app.core.base import Base
 from app.models.role import Role
+from app.models.task import Task
 from app.models.token import Token
 from app.models.user import User
 
