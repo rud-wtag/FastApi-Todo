@@ -14,6 +14,7 @@ import ResetPassword from 'pages/ResetPassword';
 import FullProfile from 'components/FullProfile';
 import UpdateProfile from 'pages/UpdateProfile';
 import SendResetLink from 'pages/SendResetLink';
+import ChangePassword from 'pages/ChangePassword';
 
 axios.defaults.baseURL = 'http://127.0.0.1:8000/api/v1';
 axios.defaults.withCredentials = true;
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
   {
     path: 'reset-password',
     element: <ResetPassword />
+  },
+  {
+    path: 'change-password',
+    element: <ChangePassword />
   },
   {
     path: 'profile',
