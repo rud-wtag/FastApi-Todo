@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Optional
+import pytz
 
 from pydantic import BaseModel, Field, field_validator
 from pydantic_core import PydanticCustomError
@@ -14,6 +15,7 @@ class Task(ModelBaseInfo, BaseModel):
     description: str
     status: bool
     priority_level: str
+    due_date: datetime
     completed_at: Optional[datetime]
 
     class config:
@@ -30,7 +32,7 @@ class TaskCreateRequest(BaseModel):
     @field_validator("due_date")
     @classmethod
     def validate_x(cls, v: int) -> int:
-        if v < datetime.now():
+        if v < datetime.now(pytz.utc):
             raise PydanticCustomError(
                 "date error",
                 f"{v} is behind from current date",
