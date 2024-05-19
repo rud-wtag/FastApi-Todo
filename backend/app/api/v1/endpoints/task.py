@@ -13,8 +13,9 @@ from app.models.user import User
 from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest
 from app.schema.task_schema import Task, TaskCreateRequest, TaskUpdateRequest
 from app.services.task_service import TaskService
+from app.core.dependencies import auth
 
-router = APIRouter(prefix="", tags=["Tasks"])
+router = APIRouter(prefix="", tags=["Tasks"], dependencies=[Depends(auth)])
 
 
 @router.post("/tasks")

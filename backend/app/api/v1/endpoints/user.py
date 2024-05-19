@@ -9,8 +9,9 @@ from app.schema.auth_schema import CreateUserResponse
 from app.services.auth_service import AuthInterface, AuthService
 from app.services.jwt_token_service import JWTTokenInterface, JWTTokenService
 from app.services.user_service import UserService
+from app.core.dependencies import admin
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(admin)])
 
 
 @router.get("", response_model=list[CreateUserResponse])

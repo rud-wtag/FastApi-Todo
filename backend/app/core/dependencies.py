@@ -22,7 +22,7 @@ def get_current_user(
 
 
 def admin(user: dict = Depends(get_current_user)):
-    if user["role"] is not None and user["role"].name == ADMIN:
+    if user["role"] is not None and user["role"] == ADMIN:
         return user
     else:
         raise HTTPException(
@@ -32,9 +32,9 @@ def admin(user: dict = Depends(get_current_user)):
 
 
 def auth(user: dict = Depends(get_current_user)):
-    if user["role"] is not None and user["role"].name == ADMIN:
+    if user["role"] is not None and user["role"] == ADMIN:
         return user
-    if user["role"] is not None and user["role"].name == USER:
+    if user["role"] is not None and user["role"] == USER:
         return user
     else:
         raise HTTPException(
