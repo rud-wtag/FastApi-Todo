@@ -5,27 +5,30 @@ import ToastContainer from 'components/ToastContainer';
 import TaskContainer from 'components/TaskContainer';
 import Heading from 'components/Heading';
 import Loader from 'components/ui/Loader';
-import { loadTasksFromDB, toast } from 'redux/actions/TodoAction';
-import supabase from 'supabase';
+import { loadTasksFromDB, toast, setPager } from 'redux/actions/TodoAction';
+import axios from 'axios';
 
 function Home() {
   const isSearching = useSelector((state) => state.searchStates.searching);
+  const pager = useSelector((state) => state.todoStates);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchTasks() {
-      let { data, error } = await supabase
-        .from('todos')
-        .select()
-        .order('createdAt', { ascending: false });
-
-      if (!error) {
-        dispatch(loadTasksFromDB(data));
-        setIsLoading(false);
-      } else {
-        dispatch(toast({ type: 'danger', message: 'something wrong. Try again later' }));
-      }
+      axios
+        .get(`/tasks?page=1&size=${pager.size}`)
+        .then((response) => {
+          if (response.status == 200) {
+            dispatch(loadTasksFromDB(response.data.items));
+            dispatch(setPager({ currentPage: response.data.page, pages: response.data.pages }));
+            setIsLoading(false);
+          }
+        })
+        .catch((error) => {
+          dispatch(toast({ type: 'danger', message: 'something wrong. Try again later' }));
+          console.log(error);
+        });
     }
 
     fetchTasks();

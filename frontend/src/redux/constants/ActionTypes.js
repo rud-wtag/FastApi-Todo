@@ -7,7 +7,8 @@ export const actionTypes = {
   SET_EDIT: 'SET_EDIT',
   NEXT_PAGE: 'NEXT_PAGE',
   TOAST_MESSAGE: 'TOAST_MESSAGE',
-  LOAD_TASKS_FROM_DB: 'LOAD_TASKS_FROM_DB'
+  LOAD_TASKS_FROM_DB: 'LOAD_TASKS_FROM_DB',
+  SET_PAGER: 'SET_PAGER'
 };
 
 export const paginationActionTypes = {

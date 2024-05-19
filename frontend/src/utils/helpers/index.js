@@ -6,8 +6,11 @@ import {
   TASKS_PER_PAGE
 } from 'utils/constants';
 
+import dayjs from 'dayjs';
+
 export const getFormattedDate = (date) => {
-  return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+  const dateTime = dayjs(date);
+  return dateTime.format('D MMMM YYYY');
 };
 
 export const daysBetweenDate = (completedAt, createdAt) => {
