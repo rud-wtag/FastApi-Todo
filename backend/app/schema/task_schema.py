@@ -20,6 +20,21 @@ class Task(ModelBaseInfo, BaseModel):
 
     class config:
         orm_mode: True
+        
+    @property
+    def computed_status(self) -> str:
+        current_time = datetime.now()
+        if self.status and self.completed_at and self.completed_at < self.due_date:
+            return "complete"
+        elif not self.completed_at and self.due_date < current_time:
+            return "incomplete"
+        else:
+            return "outdated"
+
+    def dict(self, *args, **kwargs):
+        result = super().dict(*args, **kwargs)
+        result['status'] = self.computed_status
+        return result
 
 
 class TaskCreateRequest(BaseModel):

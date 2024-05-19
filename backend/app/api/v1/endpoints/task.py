@@ -33,8 +33,9 @@ def get_all_tasks(
     search_query: Optional[str] = None,
     category: Optional[str] = None,
     status: Optional[bool] = None,
+    current_user: User = Depends(get_current_user)
 ) -> any:
-    tasks = task_service.get_all_tasks(search_query, category, status)
+    tasks = task_service.get_all_tasks(search_query, category, status, current_user)
     return tasks
 
 
@@ -64,6 +65,14 @@ def mark_as_complete(
     task_service: TaskService = Depends(TaskService),
 ):
     return task_service.mark_as_complete(task_id, current_user)
+
+@router.put("/tasks/{task_id}/incomplete")
+def mark_as_incomplete(
+    task_id,
+    current_user: User = Depends(get_current_user),
+    task_service: TaskService = Depends(TaskService),
+):
+    return task_service.mark_as_incomplete(task_id, current_user)
 
 
 @router.delete("/tasks/{task_id}")

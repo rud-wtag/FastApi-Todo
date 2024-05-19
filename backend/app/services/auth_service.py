@@ -92,7 +92,7 @@ class AuthService(AuthInterface):
                 detail="Invalid credentials",
             )
         access_token = self.jwt_token_service.create_token(
-            user.email, user.id, timedelta(minutes=20)
+            user.email, user.id, timedelta(days=1)
         )
 
         refresh_token = self.jwt_token_service.create_token(

@@ -9,6 +9,7 @@ from app.core.database import get_db
 from app.models.task import Task
 from app.models.user import User
 from app.schema.task_schema import TaskCreateRequest, TaskUpdateRequest
+from app.core.constants import ADMIN
 
 
 class TaskService:
@@ -23,8 +24,11 @@ class TaskService:
         self.db.refresh(new_task)
         return new_task
 
-    def get_all_tasks(self, search_query, category, status):
+    def get_all_tasks(self, search_query, category, status, user: dict):
         tasks = self.db.query(Task)
+        if user["role"] != ADMIN:
+            print('test---->',user["role"])
+            tasks = tasks.filter(Task.id == user["id"])
         if search_query:
             tasks = tasks.filter(Task.title.ilike(f"%{search_query}%"))
         if category:
@@ -95,74 +99,19 @@ class TaskService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Task not Found",
             )
+    
+    def mark_as_incomplete(self, task_id: int, user: dict):
+        task = self.db.query(Task).filter(Task.id == task_id, Task.user_id == user["id"]).first()
 
-    async def search_tasks(
-        self,
-        current_user: User,
-        query: Optional[str] = None,
-        category: Optional[str] = None,
-    ):
-        tasks = self.db.query(Task).filter(Task.user == current_user)
-        if query:
-            tasks = tasks.filter(Task.description.ilike(f"%{query}%"))
-        if category:
-            tasks = tasks.filter(Task.category == category)
-        return tasks.order_by(Task.id.asc()).all()
-
-    async def filter_tasks(
-        self,
-        current_user: User,
-        category: Optional[str] = None,
-        due_date: Optional[datetime] = None,
-        status: Optional[bool] = None,
-    ):
-        tasks = self.db.query(Task).filter(Task.user == current_user)
-        if category:
-            tasks = tasks.filter(Task.category == category)
-        if due_date:
-            tasks = tasks.filter(Task.completed_at.is_(None)).filter(
-                Task.id.in_(
-                    self.db.query(Task)
-                    .filter(Task.completed_at.is_(None))
-                    .filter(Task.due_date <= due_date)
-                    .filter(Task.user == current_user)
-                    .with_entities(Task.id)
-                )
+        if task is not None:
+            task.status = False
+            task.updated_at = datetime.now()
+            task.completed_at = None
+            self.db.commit()
+            self.db.refresh(task)
+            return task
+        
+        raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Task not Found",
             )
-        if status is not None:
-            tasks = tasks.filter(Task.status == status)
-        return tasks.order_by(Task.id.asc()).all()
-
-    # async def update_task(self, current_user: User, task_id: int, update_data: dict):
-    #     task = await self.get_task_by_id(current_user, task_id)
-    #     for field, value in update_data.items():
-    #         if field == "status" and value:
-    #             task.completed_at = datetime.now()
-    #         elif hasattr(task, field):
-    #             setattr(task, field, value)
-    #         else:
-    #             raise HTTPException(
-    #                 status_code=status.HTTP_400_BAD_REQUEST,
-    #                 detail=f"Invalid field: {field}",
-    #             )
-
-    #     self.db.commit()
-    #     self.db.refresh(task)
-    #     return task
-
-    # async def update_task(self, current_user: User, task_id: int, update_data: dict):
-    #     task = await self.get_task_by_id(current_user, task_id)
-    #     for field, value in update_data.items():
-    #         if field == "status" and not value:
-    #             task.completed_at = None
-    #         elif hasattr(task, field):
-    #             setattr(task, field, value)
-    #         else:
-    #             raise HTTPException(
-    #                 status_code=status.HTTP_400_BAD_REQUEST,
-    #                 detail=f"Invalid field: {field}",
-    #             )
-
-    #     self.db.commit()
-    #     self.db.refresh(task)
-    #     return task

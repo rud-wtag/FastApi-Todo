@@ -34,8 +34,8 @@ export default function Router() {
         { path: 'dashboard', element: <IndexPage /> },
         { path: 'user', element: <UserPage /> },
         { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> },
-      ],
+        { path: 'blog', element: <BlogPage /> }
+      ]
     },
     {
       path: '/',
@@ -75,12 +75,12 @@ export default function Router() {
     },
     {
       path: '404',
-      element: <Page404 />,
+      element: <Page404 />
     },
     {
       path: '*',
-      element: <Navigate to="/404" replace />,
-    },
+      element: <Navigate to="/404" replace />
+    }
   ]);
 
   return routes;
