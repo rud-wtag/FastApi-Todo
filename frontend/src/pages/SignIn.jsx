@@ -11,12 +11,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { setLoggedIn } from 'redux/actions/AppAction';
 import { toast } from 'redux/actions/TodoAction';
 import { TOAST_TYPE_ERROR } from 'utils/constants';
+import { useCookies } from 'react-cookie';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [cookies, setCookie, removeCookie] = useCookies(['profile']);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -28,6 +30,8 @@ export default function SignIn() {
       .post('/auth/login', formData)
       .then((response) => {
         if (response.status == 200) {
+          console.log(response);
+          setCookie('profile', response.data.user);
           dispatch(setLoggedIn(true));
           navigate('/');
         }

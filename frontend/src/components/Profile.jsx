@@ -1,14 +1,16 @@
-import { useEffect } from 'react';
-import axios from 'axios';
 import Button from '@mui/material/Button';
 import Popover from '@mui/material/Popover';
-import PopupState, { bindTrigger, bindPopover } from 'material-ui-popup-state';
 import { ReactComponent as UserIcon } from 'assets/user.svg';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
+import PopupState, { bindPopover, bindTrigger } from 'material-ui-popup-state';
+import { useEffect } from 'react';
+import { useCookies } from 'react-cookie';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { setLoggedIn, setProfile } from 'redux/actions/AppAction';
 
 export default function Profile() {
+  const [cookies, setCookie, removeCookie] = useCookies(['cookie-name']);
   const profile = useSelector((state) => state.appStates.profile);
   const isLoggedIn = useSelector((state) => state.appStates.isLoggedIn);
   const dispatch = useDispatch();
@@ -21,7 +23,9 @@ export default function Profile() {
       .get('/auth/logout')
       .then((res) => {
         if (res.status == 200) {
+          removeCookie('profile');
           dispatch(setLoggedIn(false));
+          navigate('/sign-in');
         }
       })
       .catch((err) => {

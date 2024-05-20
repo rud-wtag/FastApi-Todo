@@ -67,6 +67,7 @@ Task.propTypes = {
     description: PropTypes.string.isRequired,
     priority_level: PropTypes.string.isRequired,
     category: PropTypes.string.isRequired,
+    task_state: PropTypes.string,
     isEditMode: PropTypes.bool,
     created_at: PropTypes.instanceOf(Date).isRequired,
     due_date: PropTypes.instanceOf(Date).isRequired,
