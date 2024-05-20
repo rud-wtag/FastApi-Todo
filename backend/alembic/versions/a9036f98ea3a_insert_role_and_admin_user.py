@@ -54,7 +54,17 @@ def upgrade() -> None:
                 "is_active": True,
                 "created_at": datetime.now(),
                 "updated_at": datetime.now(),
-            }
+            },
+            {
+                "id": 2,
+                "role_id": 2,
+                "full_name": "User",
+                "email": "user@mail.com",
+                "password": get_hashed_password("secret"),
+                "is_active": True,
+                "created_at": datetime.now(),
+                "updated_at": datetime.now(),
+            },
         ],
     )
 

@@ -36,7 +36,12 @@ class Mail:
         )
 
     async def send_email_async(
-        self, subject: str, email_to: str, body: str, template_body: dict
+        self,
+        subject: str,
+        email_to: str,
+        body: str,
+        template_body: dict,
+        template_name: str = "email.html",
     ):
         message = MessageSchema(
             subject=subject,
@@ -46,7 +51,7 @@ class Mail:
             subtype=MessageType.html,
         )
         fm = FastMail(self.conf)
-        await fm.send_message(message, template_name="email.html")
+        await fm.send_message(message, template_name=template_name)
 
     def send_email_background(
         self,
