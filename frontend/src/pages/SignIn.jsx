@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { ReactComponent as Logo } from 'assets/logo.svg';
-import { setLoggedIn } from 'redux/actions/AppAction';
-import ToastContainer from 'components/ToastContainer';
+import axios from 'axios';
 import Heading from 'components/Heading';
-import { Box } from '@mui/material';
+import ToastContainer from 'components/ToastContainer';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { setLoggedIn } from 'redux/actions/AppAction';
 import { toast } from 'redux/actions/TodoAction';
 import { TOAST_TYPE_ERROR } from 'utils/constants';
 
@@ -74,8 +74,20 @@ export default function SignIn() {
           >
             Sign In
           </Button>
-          <Box sx={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-            <p>Forget Password?</p> <Link to="/send-reset-link">Click here</Link>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: '2rem',
+              alignItems: 'center'
+            }}
+          >
+            <Box sx={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+              <p>Forget Password?</p> <Link to="/send-reset-link">Click here</Link>
+            </Box>
+            <Box sx={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+              <p>Don't have account?</p> <Link to="/sign-up">Sign Up</Link>
+            </Box>
           </Box>
         </div>
       </div>

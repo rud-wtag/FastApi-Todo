@@ -46,8 +46,7 @@ export const editTodo = (task_id, updated_task) => {
         dispatch(toast({ type: 'success', message: 'Task updated successfully' }));
       })
       .catch((error) => {
-        console.log(error);
-        dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Failed to update task' }));
+        dispatch(toast({ type: TOAST_TYPE_ERROR, message: error.response.data.detail?.[0]?.msg }));
       });
   };
 };

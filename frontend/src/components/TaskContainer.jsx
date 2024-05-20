@@ -1,15 +1,14 @@
-import * as React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { Box } from '@mui/material';
+import Pagination from '@mui/material/Pagination';
+import axios from 'axios';
 import AddTask from 'components/AddTask';
 import NoTaskPlaceholder from 'components/NoTaskPlaceholder';
 import Task from 'components/Task';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { loadTasksFromDB, toast } from 'redux/actions/TodoAction';
-import Pagination from '@mui/material/Pagination';
 import { TOAST_TYPE_ERROR } from 'utils/constants';
 import { filterTasks } from 'utils/helpers/ReducerHelper';
-import { Box } from '@mui/material';
 
 export default function TaskContainer() {
   const tasks = useSelector((state) => state.todoStates.todos);
@@ -56,8 +55,8 @@ export default function TaskContainer() {
             <Task
               task={{
                 ...task,
-                createdAt: task.createdAt ? new Date(task.createdAt) : task.createdAt,
-                completedAt: task.completedAt ? new Date(task.completedAt) : task.completedAt
+                created_at: task.created_at ? new Date(task.created_at) : task.created_at,
+                completed_at: task.completed_at ? new Date(task.completed_at) : task.completed_at
               }}
               key={task.id}
             />

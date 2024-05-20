@@ -1,7 +1,7 @@
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import EditTask from 'components/EditTask';
 import TaskFooter from 'components/ui/TaskFooter';
+import PropTypes from 'prop-types';
 import { getFormattedDate } from 'utils/helpers';
 
 function Task({ task }) {
@@ -14,6 +14,7 @@ function Task({ task }) {
     priority_level,
     category,
     completed_at,
+    task_state,
     isEditMode
   } = task;
 
@@ -22,7 +23,11 @@ function Task({ task }) {
       {isEditMode ? (
         <EditTask task={task} />
       ) : (
-        <div className="task">
+        <div
+          className={classNames('task', {
+            'task--outdated': task_state === 'outdated'
+          })}
+        >
           <div
             className={classNames('task__title', {
               'task__title--completed': completed_at
@@ -57,7 +62,7 @@ export default Task;
 
 Task.propTypes = {
   task: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     priority_level: PropTypes.string.isRequired,

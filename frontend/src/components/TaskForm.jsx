@@ -120,7 +120,7 @@ function TaskForm({ isEditMode = false, task, submitTask }) {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DesktopDatePicker
             onChange={(newValue) => setDueDate(dayjs(newValue).toISOString())}
-            defaultValue={dayjs()}
+            defaultValue={dayjs(dueDate)}
           />
         </LocalizationProvider>
         <div className="task__footer">

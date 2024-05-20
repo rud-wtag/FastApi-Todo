@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import ToastContainer from 'components/ToastContainer';
-import Heading from 'components/Heading';
 import { ReactComponent as Logo } from 'assets/logo.svg';
+import axios from 'axios';
+import Heading from 'components/Heading';
+import ToastContainer from 'components/ToastContainer';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'redux/actions/TodoAction';
 import { TOAST_TYPE_ERROR, TOAST_TYPE_SUCCESS } from 'utils/constants';
-import { useDispatch } from 'react-redux';
 
 export default function ChangePassword() {
   const dispatch = useDispatch();
@@ -35,8 +35,8 @@ export default function ChangePassword() {
       .then((response) => {
         console.log(response, response.status);
         if (response.status == 200) {
-          navigate('/profile');
           dispatch(toast({ type: TOAST_TYPE_SUCCESS, message: 'Password reset successful' }));
+          navigate('/sign-in');
         }
       })
       .catch((error) => {

@@ -6,8 +6,9 @@ import { ReactComponent as DoneIcon } from 'assets/ok.svg';
 import Button from 'components/ui/Button';
 import { deleteTodo, setEditMode, setTodoComplete } from 'redux/actions/TodoAction';
 import { daysBetweenDate } from 'utils/helpers';
+import ActionMenu from 'components/ActionMenu';
 
-export default function TaskFooter({ completedAt = null, createdAt, taskId }) {
+export default function TaskFooter({ completed_at = null, created_at, taskId }) {
   const dispatch = useDispatch();
 
   function onDelete(event) {
@@ -29,7 +30,7 @@ export default function TaskFooter({ completedAt = null, createdAt, taskId }) {
   return (
     <div className="task__footer">
       <div className="task__footer-left">
-        {!completedAt && (
+        {!completed_at && (
           <>
             <Button variant="icon" onClick={onComplete}>
               <DoneIcon />
@@ -42,10 +43,11 @@ export default function TaskFooter({ completedAt = null, createdAt, taskId }) {
         <Button variant="icon" onClick={onDelete}>
           <DeleteIcon />
         </Button>
+        <ActionMenu />
       </div>
-      {completedAt && (
+      {completed_at && (
         <div className="task__footer-right">
-          completed in: {daysBetweenDate(completedAt, createdAt)}
+          completed in: {daysBetweenDate(completed_at, created_at)}
         </div>
       )}
     </div>
@@ -53,7 +55,7 @@ export default function TaskFooter({ completedAt = null, createdAt, taskId }) {
 }
 
 TaskFooter.propTypes = {
-  completedAt: propTypes.instanceOf(Date),
-  taskId: propTypes.string.isRequired,
-  createdAt: propTypes.instanceOf(Date).isRequired
+  completed_at: propTypes.instanceOf(Date),
+  taskId: propTypes.number.isRequired,
+  created_at: propTypes.instanceOf(Date).isRequired
 };
