@@ -1,18 +1,14 @@
-import typing
-from typing import Annotated, Optional
-
-from fastapi import APIRouter, Depends, Form
-from fastapi.responses import JSONResponse
-from fastapi_pagination import Page
-from sqlalchemy.orm import Session
+from typing import Optional
 
 from app.core.database import get_db
 from app.core.dependencies import auth, get_current_user
 from app.faker.task_faker import create_dummy_tasks
 from app.models.user import User
-from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest
 from app.schema.task_schema import Task, TaskCreateRequest, TaskUpdateRequest
 from app.services.task_service import TaskService
+from fastapi import APIRouter, Depends, Form
+from fastapi_pagination import Page
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="", tags=["Tasks"], dependencies=[Depends(auth)])
 
@@ -88,3 +84,9 @@ def delete_task(
 def fake_tasks(db: Session = Depends(get_db)):
     create_dummy_tasks(db)
     return {"msg": "task created"}
+
+@router.on_event("startup")
+def hey():
+   task_service = TaskService()
+   task_service.send_mail_to_user_on_due_task()
+

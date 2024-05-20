@@ -1,20 +1,27 @@
-from datetime import datetime
-from typing import Optional
-
+from datetime import datetime, timedelta
+import pytz
 from fastapi import Depends, HTTPException, status
 from fastapi_pagination import paginate
-from sqlalchemy.orm import Session
+from fastapi_utilities import repeat_at
+from sqlalchemy import create_engine
+from sqlalchemy.future import select
+from sqlalchemy.orm import Session, sessionmaker
+from starlette.background import BackgroundTasks
 
+from app.core.config import settings
 from app.core.constants import ADMIN
 from app.core.database import get_db
+from app.core.mail import mail
+from app.logger import logger
 from app.models.task import Task
 from app.models.user import User
 from app.schema.task_schema import TaskCreateRequest, TaskUpdateRequest
 
 
 class TaskService:
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db), background_tasks: BackgroundTasks = BackgroundTasks()):
         self.db = db
+        self.background_tasks = background_tasks
 
     def create_task(self, user: dict, create_task_request: TaskCreateRequest):
         new_task = Task(**create_task_request.model_dump())
@@ -114,3 +121,36 @@ class TaskService:
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Task not Found",
         )
+    
+    # @repeat_at(cron="*/1 * * * *")
+    @repeat_at(cron="0 1 * * *")
+    async def send_mail_to_user_on_due_task(self):
+        engine = create_engine(settings.database.url, pool_pre_ping=True)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        db = SessionLocal()
+        try:
+            tomorrow = datetime.now(pytz.utc) + timedelta(days=1)
+            tomorrow_start = datetime(tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0, tzinfo=pytz.utc)
+            tomorrow_end = datetime(tomorrow.year, tomorrow.month, tomorrow.day, 23, 59, 59, tzinfo=pytz.utc)
+
+            # Filter tasks due tomorrow
+            tasks_due_tomorrow = db.query(Task).filter(
+            Task.due_date >= tomorrow_start,
+            Task.due_date <= tomorrow_end
+            ).all()
+
+
+            # Send email to each user with a task due tomorrow
+            for task in tasks_due_tomorrow:
+                user = db.query(User).filter(User.id == task.user_id).first()
+                if user and user.email:
+                    await mail.send_email_async(
+                        "Remainder Email",
+                        user.email,
+                        "",
+                        template_body={"task_id": task.id, "due_date": task.due_date},
+                        template_name="task-remainder.html",
+                    )
+            logger.info(f"Remainder sent to task owner -> {task.id}")
+        except Exception as e:
+            logger.exception(e)
