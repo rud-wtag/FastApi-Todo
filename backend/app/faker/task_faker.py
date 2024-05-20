@@ -27,8 +27,10 @@ def create_dummy_tasks(db: Session, user_id: int = 2, num_tasks: int = 1000):
             description=faker.paragraph(),
             status=faker.boolean(),
             priority_level=faker.random.choice(["LOW", "MEDIUM", "HIGH"]),
-            created_at=datetime(2024,5,1),
-            due_date=faker.date_between_dates(date_start=datetime(2024,5,10), date_end=datetime(2024,5,30)),
+            created_at=datetime(2024, 5, 1),
+            due_date=faker.date_between_dates(
+                date_start=datetime(2024, 5, 10), date_end=datetime(2024, 5, 30)
+            ),
         )
         db.add(task)
 

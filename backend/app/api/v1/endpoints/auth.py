@@ -35,7 +35,7 @@ async def login_for_access_token(
     auth_service: AuthInterface = Depends(AuthService),
 ):
     tokens = auth_service.login(form_data.username, form_data.password)
-    response = JSONResponse({"msg": "Logged in successfully"})
+    response = JSONResponse({"msg": "Logged in successfully", "user": tokens["user"]})
     response.set_cookie(
         key="access_token",
         value=tokens["access_token"],

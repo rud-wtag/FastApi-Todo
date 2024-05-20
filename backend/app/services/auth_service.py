@@ -98,7 +98,16 @@ class AuthService(AuthInterface):
         refresh_token = self.jwt_token_service.create_token(
             user.email, user.id, timedelta(days=7), type=REFRESH_TOKEN
         )
-        return {"access_token": access_token, "refresh_token": refresh_token}
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "name": user.full_name,
+                "role": user.role.name,
+            },
+        }
 
     def logout(self, user: dict, access_token: str, refresh_token: str):
         response = JSONResponse({"msg": "Logged out!"})

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+
 import pytz
 from fastapi import Depends, HTTPException, status
 from fastapi_pagination import paginate
@@ -19,7 +20,11 @@ from app.schema.task_schema import TaskCreateRequest, TaskUpdateRequest
 
 
 class TaskService:
-    def __init__(self, db: Session = Depends(get_db), background_tasks: BackgroundTasks = BackgroundTasks()):
+    def __init__(
+        self,
+        db: Session = Depends(get_db),
+        background_tasks: BackgroundTasks = BackgroundTasks(),
+    ):
         self.db = db
         self.background_tasks = background_tasks
 
@@ -121,7 +126,7 @@ class TaskService:
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Task not Found",
         )
-    
+
     # @repeat_at(cron="*/1 * * * *")
     @repeat_at(cron="0 1 * * *")
     async def send_mail_to_user_on_due_task(self):
@@ -130,15 +135,19 @@ class TaskService:
         db = SessionLocal()
         try:
             tomorrow = datetime.now(pytz.utc) + timedelta(days=1)
-            tomorrow_start = datetime(tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0, tzinfo=pytz.utc)
-            tomorrow_end = datetime(tomorrow.year, tomorrow.month, tomorrow.day, 23, 59, 59, tzinfo=pytz.utc)
+            tomorrow_start = datetime(
+                tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0, tzinfo=pytz.utc
+            )
+            tomorrow_end = datetime(
+                tomorrow.year, tomorrow.month, tomorrow.day, 23, 59, 59, tzinfo=pytz.utc
+            )
 
             # Filter tasks due tomorrow
-            tasks_due_tomorrow = db.query(Task).filter(
-            Task.due_date >= tomorrow_start,
-            Task.due_date <= tomorrow_end
-            ).all()
-
+            tasks_due_tomorrow = (
+                db.query(Task)
+                .filter(Task.due_date >= tomorrow_start, Task.due_date <= tomorrow_end)
+                .all()
+            )
 
             # Send email to each user with a task due tomorrow
             for task in tasks_due_tomorrow:
