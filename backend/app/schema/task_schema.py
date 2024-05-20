@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional
-import pytz
 
-from pydantic import BaseModel, Field, field_validator
+import pytz
+from pydantic import BaseModel, Field, computed_field, field_validator
 from pydantic_core import PydanticCustomError
 
 from app.schema.base_schema import ModelBaseInfo
@@ -20,21 +20,19 @@ class Task(ModelBaseInfo, BaseModel):
 
     class config:
         orm_mode: True
-        
-    @property
-    def computed_status(self) -> str:
-        current_time = datetime.now()
-        if self.status and self.completed_at and self.completed_at < self.due_date:
-            return "complete"
-        elif not self.completed_at and self.due_date < current_time:
-            return "incomplete"
-        else:
-            return "outdated"
 
-    def dict(self, *args, **kwargs):
-        result = super().dict(*args, **kwargs)
-        result['status'] = self.computed_status
-        return result
+    @computed_field
+    @property
+    def task_state(self) -> str:
+        current_time = datetime.now(pytz.utc)  # Ensure current time is timezone-aware
+        if self.completed_at:
+            if self.completed_at < self.due_date:
+                return "complete"
+            else:
+                return "outdated"
+        if self.due_date < current_time:
+            return "outdated"
+        return "incomplete"
 
 
 class TaskCreateRequest(BaseModel):
@@ -46,11 +44,13 @@ class TaskCreateRequest(BaseModel):
 
     @field_validator("due_date")
     @classmethod
-    def validate_x(cls, v: int) -> int:
+    def validate_due_date(cls, v: datetime) -> datetime:
+        if v.tzinfo is None:
+            v = pytz.utc.localize(v)  # Convert naive datetime to aware datetime in UTC
         if v < datetime.now(pytz.utc):
             raise PydanticCustomError(
                 "date error",
-                f"{v} is behind from current date",
+                f"{v} is behind the current date",
                 {"date": v},
             )
         return v
@@ -73,6 +73,19 @@ class TaskUpdateRequest(BaseModel):
     description: Optional[str]
     priority_level: Optional[str]
     due_date: Optional[datetime]
+
+    @field_validator("due_date")
+    @classmethod
+    def validate_due_date(cls, v: datetime) -> datetime:
+        if v.tzinfo is None:
+            v = pytz.utc.localize(v)  # Convert naive datetime to aware datetime in UTC
+        if v < datetime.now(pytz.utc):
+            raise PydanticCustomError(
+                "date error",
+                f"{v} is behind the current date",
+                {"date": v},
+            )
+        return v
 
     model_config = {
         "json_schema_extra": {

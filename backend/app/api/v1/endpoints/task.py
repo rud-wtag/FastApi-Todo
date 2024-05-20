@@ -7,13 +7,12 @@ from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import auth, get_current_user
 from app.faker.task_faker import create_dummy_tasks
 from app.models.user import User
 from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest
 from app.schema.task_schema import Task, TaskCreateRequest, TaskUpdateRequest
 from app.services.task_service import TaskService
-from app.core.dependencies import auth
 
 router = APIRouter(prefix="", tags=["Tasks"], dependencies=[Depends(auth)])
 
@@ -33,7 +32,7 @@ def get_all_tasks(
     search_query: Optional[str] = None,
     category: Optional[str] = None,
     status: Optional[bool] = None,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ) -> any:
     tasks = task_service.get_all_tasks(search_query, category, status, current_user)
     return tasks
@@ -65,6 +64,7 @@ def mark_as_complete(
     task_service: TaskService = Depends(TaskService),
 ):
     return task_service.mark_as_complete(task_id, current_user)
+
 
 @router.put("/tasks/{task_id}/incomplete")
 def mark_as_incomplete(

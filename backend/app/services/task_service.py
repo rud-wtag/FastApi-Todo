@@ -5,11 +5,11 @@ from fastapi import Depends, HTTPException, status
 from fastapi_pagination import paginate
 from sqlalchemy.orm import Session
 
+from app.core.constants import ADMIN
 from app.core.database import get_db
 from app.models.task import Task
 from app.models.user import User
 from app.schema.task_schema import TaskCreateRequest, TaskUpdateRequest
-from app.core.constants import ADMIN
 
 
 class TaskService:
@@ -27,8 +27,7 @@ class TaskService:
     def get_all_tasks(self, search_query, category, status, user: dict):
         tasks = self.db.query(Task)
         if user["role"] != ADMIN:
-            print('test---->',user["role"])
-            tasks = tasks.filter(Task.id == user["id"])
+            tasks = tasks.filter(Task.user_id == user["id"])
         if search_query:
             tasks = tasks.filter(Task.title.ilike(f"%{search_query}%"))
         if category:
@@ -48,11 +47,11 @@ class TaskService:
         )
 
     def get_task_by_id(self, user: dict, task_id: int):
-        task = (
-            self.db.query(Task)
-            .filter(Task.user_id == user["id"], Task.id == task_id)
-            .first()
-        )
+        task = self.db.query(Task)
+        task = task.filter(Task.id == task_id)
+        if user["role"] != ADMIN:
+            task = task.filter(Task.user_id == user["id"])
+        task = task.first()
         if not task:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
@@ -85,7 +84,7 @@ class TaskService:
         return {"message": "Task deleted successfully"}
 
     def mark_as_complete(self, task_id: int, user: dict):
-        task = self.db.query(Task).filter(Task.id == task_id, Task.user_id == user["id"]).first()
+        task = self.get_task_by_id(user, task_id)
 
         if task is not None:
             task.status = True
@@ -94,14 +93,14 @@ class TaskService:
             self.db.commit()
             self.db.refresh(task)
             return task
-        
+
         raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Task not Found",
-            )
-    
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Task not Found",
+        )
+
     def mark_as_incomplete(self, task_id: int, user: dict):
-        task = self.db.query(Task).filter(Task.id == task_id, Task.user_id == user["id"]).first()
+        task = self.get_task_by_id(user, task_id)
 
         if task is not None:
             task.status = False
@@ -110,8 +109,8 @@ class TaskService:
             self.db.commit()
             self.db.refresh(task)
             return task
-        
+
         raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Task not Found",
-            )
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Task not Found",
+        )
