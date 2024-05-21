@@ -5,6 +5,7 @@ import Heading from 'components/Heading';
 import ToastContainer from 'components/ToastContainer';
 
 import axios from 'axios';
+import FileUpload from 'components/ui/UploadFile';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -15,8 +16,14 @@ export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [full_name, setFullName] = useState('');
+  const [avatar, setAvatar] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const onUpload = (e) => {
+    e.preventDefault()
+    setAvatar(e.target.files[0])
+  }
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -24,9 +31,10 @@ export default function SignUp() {
     formData.append('full_name', password);
     formData.append('email', email);
     formData.append('password', password);
+    avatar? formData.append('avatar', avatar) : '';
 
     axios
-      .post('/auth/register', { full_name, email, password })
+      .post('/auth/register', formData)
       .then((response) => {
         if (response.status == 200) {
           navigate('/sign-in');
@@ -77,6 +85,7 @@ export default function SignUp() {
               setPassword(e.target.value);
             }}
           />
+          <FileUpload onUpload={onUpload} title={"Avatar Upload"}/>
           <Button
             variant="outlined"
             onClick={(e) => {
