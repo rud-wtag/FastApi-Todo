@@ -1,3 +1,4 @@
+import AdminRoute from 'components/AdminRoute';
 import ProtectedRoute from 'components/AuthRequired';
 import FullProfile from 'components/FullProfile';
 import DashboardLayout from 'layouts/dashboard';
@@ -31,10 +32,42 @@ export default function Router() {
         </DashboardLayout>
       ),
       children: [
-        { path: 'dashboard', element: <IndexPage /> },
-        { path: 'user', element: <UserPage /> },
-        { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> }
+        {
+          path: 'dashboard',
+          element: (
+            <AdminRoute>
+              {' '}
+              <IndexPage />{' '}
+            </AdminRoute>
+          )
+        },
+        {
+          path: 'user',
+          element: (
+            <AdminRoute>
+              {' '}
+              <UserPage />{' '}
+            </AdminRoute>
+          )
+        },
+        {
+          path: 'products',
+          element: (
+            <AdminRoute>
+              {' '}
+              <ProductsPage />
+            </AdminRoute>
+          )
+        },
+        {
+          path: 'blog',
+          element: (
+            <AdminRoute>
+              {' '}
+              <BlogPage />
+            </AdminRoute>
+          )
+        }
       ]
     },
     {

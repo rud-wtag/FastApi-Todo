@@ -6,7 +6,7 @@ import NoTaskPlaceholder from 'components/NoTaskPlaceholder';
 import Task from 'components/Task';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadTasksFromDB, toast } from 'redux/actions/TodoAction';
+import { loadTasksFromDB, toast, setPager } from 'redux/actions/TodoAction';
 import { TOAST_TYPE_ERROR } from 'utils/constants';
 import { filterTasks } from 'utils/helpers/ReducerHelper';
 
@@ -14,6 +14,8 @@ export default function TaskContainer() {
   const tasks = useSelector((state) => state.todoStates.todos);
   const pager = useSelector((state) => state.todoStates);
   const filter = useSelector((state) => state.filterStates.filterState);
+  const priority = useSelector((state) => state.filterStates.priority);
+  const dueDate = useSelector((state) => state.filterStates.dueDate);
   const search = useSelector((state) => state.searchStates);
   const isNewTaskRequested = useSelector((state) => state.todoStates.isNewTaskRequested);
   const [page, setPage] = useState(1);
@@ -29,21 +31,19 @@ export default function TaskContainer() {
   useEffect(() => {
     axios
       .get(
-        `/tasks?search_query=${search.query}&page=${page}&size=${pager.size}${
-          filterTasks(filter) != null ? `&status=${filterTasks(filter)}` : ``
-        }`
+        `/tasks?search_query=${search.query}&page=${page}&size=${pager.size}${filterTasks(filter) != null ? `&status=${filterTasks(filter)}` : ``}${priority != null ? `&priority_level=${priority}` : ``}${dueDate != null ? `&due_date=${dueDate}` : ``}`
       )
       .then((response) => {
         if (response.status == 200) {
-          console.log(response.data.items);
           dispatch(loadTasksFromDB(response.data.items));
+          dispatch(setPager({ page: response.data.page, pages: response.data.pages }));
         }
       })
       .catch((error) => {
         console.log(error);
         dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Failed to update task' }));
       });
-  }, [search, page, filter]);
+  }, [search, page, filter, priority, dueDate]);
 
   return (
     <>

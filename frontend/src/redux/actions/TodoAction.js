@@ -21,7 +21,7 @@ export const addTodo = (title, description, due_date, priority_level, category) 
             type: actionTypes.ADD_TODO,
             payload: {
               ...INITIAL_TASK,
-              ...task
+              ...res.data
             }
           });
         dispatch(toast({ type: 'success', message: 'Task added successfully' }));

@@ -17,6 +17,8 @@ export const paginationActionTypes = {
 
 export const filterActionTypes = {
   SET_FILTER: 'SET_FILTER',
+  SET_PRIORITY: 'SET_PRIORITY',
+  SET_DUE_DATE: 'SET_DUE_DATE',
   ALL: 'All',
   INCOMPLETE: 'Incomplete',
   COMPLETE: 'Complete'
