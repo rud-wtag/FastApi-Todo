@@ -33,7 +33,9 @@ def get_all_tasks(
     status: Optional[bool] = None,
     current_user: User = Depends(get_current_user),
 ) -> any:
-    tasks = task_service.get_all_tasks(search_query, category, priority_level, due_date, status, current_user)
+    tasks = task_service.get_all_tasks(
+        search_query, category, priority_level, due_date, status, current_user
+    )
     return tasks
 
 

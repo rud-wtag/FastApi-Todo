@@ -36,7 +36,9 @@ class TaskService:
         self.db.refresh(new_task)
         return new_task
 
-    def get_all_tasks(self, search_query, category, priority_level, due_date, status, user: dict):
+    def get_all_tasks(
+        self, search_query, category, priority_level, due_date, status, user: dict
+    ):
         tasks = self.db.query(Task)
         if user["role"] != ADMIN:
             tasks = tasks.filter(Task.user_id == user["id"])

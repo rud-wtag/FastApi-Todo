@@ -19,10 +19,10 @@ class BaseUser(BaseModel):
 
 
 class CreateUserRequest(BaseUser):
-    full_name: str = Form(...)
-    email: EmailStr = Form(...)
-    password: str = Form(..., min_length=6)
-    avatar: str = Form(None)
+    full_name: str
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+    avatar: str | None = Field(default=None)
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -52,3 +52,8 @@ class CreateUserResponse(BaseUser):
 
     class config:
         fields = {"avatar": "_test"}
+
+
+class FullUserResponse(CreateUserResponse):
+    is_active: bool
+    is_email_verified: bool
