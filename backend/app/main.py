@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi_pagination import add_pagination
 
 from app.api.v1.routes import routers
@@ -15,5 +16,7 @@ app.add_middleware(
     allow_methods=settings.cors.methods,
     allow_headers=settings.cors.headers,
 )
+
+app.mount("/files", StaticFiles(directory="files"), name="files")
 
 app.include_router(routers, prefix="/api/v1")
