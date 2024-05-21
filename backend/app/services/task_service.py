@@ -36,7 +36,7 @@ class TaskService:
         self.db.refresh(new_task)
         return new_task
 
-    def get_all_tasks(self, search_query, category, status, user: dict):
+    def get_all_tasks(self, search_query, category, priority_level, due_date, status, user: dict):
         tasks = self.db.query(Task)
         if user["role"] != ADMIN:
             tasks = tasks.filter(Task.user_id == user["id"])
@@ -44,6 +44,10 @@ class TaskService:
             tasks = tasks.filter(Task.title.ilike(f"%{search_query}%"))
         if category:
             tasks = tasks.filter(Task.category == category)
+        if priority_level:
+            tasks = tasks.filter(Task.priority_level == priority_level)
+        if due_date:
+            tasks = tasks.filter(Task.due_date == datetime.fromisoformat(due_date))
         if status:
             tasks = tasks.filter(Task.status == status)
         if status == False:
