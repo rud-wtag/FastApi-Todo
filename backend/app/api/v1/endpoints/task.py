@@ -28,10 +28,12 @@ def get_all_tasks(
     task_service: TaskService = Depends(TaskService),
     search_query: Optional[str] = None,
     category: Optional[str] = None,
+    priority_level: Optional[str] = None,
+    due_date: Optional[str] = None,
     status: Optional[bool] = None,
     current_user: User = Depends(get_current_user),
 ) -> any:
-    tasks = task_service.get_all_tasks(search_query, category, status, current_user)
+    tasks = task_service.get_all_tasks(search_query, category, priority_level, due_date, status, current_user)
     return tasks
 
 
