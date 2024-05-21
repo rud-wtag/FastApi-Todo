@@ -14,16 +14,15 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import SecondaryButton from '@mui/material/Button';
 
-
 function FilterButtons() {
   const dispatch = useDispatch();
 
   const priorityChange = (event) => {
-    dispatch(setPriority(event.target.value))
+    dispatch(setPriority(event.target.value));
   };
 
   const dueDateChange = (dueDate) => {
-    dispatch(setDueDate(dueDate))
+    dispatch(setDueDate(dueDate));
   };
 
   const actionButtons = [
@@ -37,8 +36,7 @@ function FilterButtons() {
     dispatch(setFilter(label));
   }
 
-  function resetFilter(even)
-  {
+  function resetFilter(even) {
     event.preventDefault();
     dispatch(setPriority(null));
     dispatch(setDueDate(null));
@@ -46,9 +44,11 @@ function FilterButtons() {
   }
 
   return (
-    <Box sx={{display: "flex", gap: "1rem"}}>
-      <SecondaryButton variant="contained" color="secondary" onClick={(e) => resetFilter(e)}>Reset</SecondaryButton>
-      <Box sx={{ minWidth: 120, height: "56px" }}>
+    <Box className="filters">
+      <SecondaryButton variant="contained" color="secondary" onClick={(e) => resetFilter(e)}>
+        Reset
+      </SecondaryButton>
+      <Box sx={{ minWidth: 120, height: '56px' }}>
         <FormControl fullWidth>
           <InputLabel id="demo-simple-select-label">Priority</InputLabel>
           <Select

@@ -7,14 +7,30 @@ import Button from 'components/ui/Button';
 import { deleteTodo, setEditMode, setTodoComplete } from 'redux/actions/TodoAction';
 import { daysBetweenDate } from 'utils/helpers';
 import ActionMenu from 'components/ActionMenu';
+import { useEffect, useState } from 'react';
+import AlertDialog from './AlertDialog';
 
 export default function TaskFooter({ completed_at = null, created_at, taskId }) {
   const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
+  const [proceed, setProceed] = useState(false);
 
   function onDelete(event) {
     event.preventDefault();
-    alert('Task will removed!');
-    dispatch(deleteTodo(taskId));
+    setOpen(true);
+  }
+
+  function onProceed(event) {
+    event.preventDefault();
+    setProceed(true);
+    setOpen(false);
+  }
+
+  function onClose(event) {
+    event.preventDefault();
+
+    setProceed(false);
+    setOpen(false);
   }
 
   function onComplete(event) {
@@ -26,6 +42,13 @@ export default function TaskFooter({ completed_at = null, created_at, taskId }) 
     event.preventDefault();
     dispatch(setEditMode({ taskId: taskId, isEditMode: true }));
   }
+
+  useEffect(() => {
+    if (proceed == true) {
+      dispatch(deleteTodo(taskId));
+      setProceed(false);
+    }
+  }, [proceed]);
 
   return (
     <div className="task__footer">
@@ -44,6 +67,13 @@ export default function TaskFooter({ completed_at = null, created_at, taskId }) 
           <DeleteIcon />
         </Button>
         <ActionMenu />
+        <AlertDialog
+          title={'Delete task !!'}
+          description={'Task will no longer accessible and backed up'}
+          open={open}
+          handleConfirm={(e) => onProceed(e)}
+          handleClose={(e) => onClose(e)}
+        />
       </div>
       {completed_at && (
         <div className="task__footer-right">

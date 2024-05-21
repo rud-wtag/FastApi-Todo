@@ -48,10 +48,12 @@ export default function Heading() {
         </div>
       </Link>
       <div className="header__right">
-        <input onChange={onSearch} type="text" className={inputClasses} />
-        <Button variant="icon" onClick={onSearchClick}>
-          <SearchIcon />
-        </Button>
+        <div className="search-box">
+          <input onChange={onSearch} type="text" className={inputClasses} />
+          <Button variant="icon" onClick={onSearchClick}>
+            <SearchIcon />
+          </Button>
+        </div>
         <Profile />
       </div>
     </div>

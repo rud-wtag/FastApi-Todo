@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -21,21 +21,36 @@ import UserTableHead from '../user-table-head';
 import UserTableRow from '../user-table-row';
 import UserTableToolbar from '../user-table-toolbar';
 import { applyFilter, emptyRows, getComparator } from '../utils';
+import axios from 'axios';
 
 // ----------------------------------------------------------------------
 
 export default function UserPage() {
+  const [users, setUsers] = useState([]);
   const [page, setPage] = useState(0);
 
   const [order, setOrder] = useState('asc');
 
   const [selected, setSelected] = useState([]);
 
-  const [orderBy, setOrderBy] = useState('name');
+  const [orderBy, setOrderBy] = useState('full_name');
 
   const [filterName, setFilterName] = useState('');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  useEffect(() => {
+    axios
+      .get('/users')
+      .then((response) => {
+        if (response.status == 200) {
+          setUsers(response.data);
+        }
+      })
+      .catch((error) => {
+        dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Unable to load user' }));
+      });
+  }, []);
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -47,18 +62,18 @@ export default function UserPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = users.map((n) => n.name);
+      const newSelecteds = users.map((n) => n.full_name);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
+  const handleClick = (event, full_name) => {
+    const selectedIndex = selected.indexOf(full_name);
     let newSelected = [];
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, full_name);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -122,10 +137,10 @@ export default function UserPage() {
                 onRequestSort={handleSort}
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
-                  { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
+                  { id: 'full_name', label: 'Full Name' },
+                  { id: 'email', label: 'Email' },
                   { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
+                  { id: 'isVerified', label: 'Email Verified', align: 'center' },
                   { id: 'status', label: 'Status' },
                   { id: '' }
                 ]}
@@ -136,14 +151,14 @@ export default function UserPage() {
                   .map((row) => (
                     <UserTableRow
                       key={row.id}
-                      name={row.name}
-                      role={row.role}
-                      status={row.status}
-                      company={row.company}
-                      avatarUrl={row.avatarUrl}
-                      isVerified={row.isVerified}
-                      selected={selected.indexOf(row.name) !== -1}
-                      handleClick={(event) => handleClick(event, row.name)}
+                      full_name={row.full_name}
+                      role={row.role_id}
+                      status={row.is_active}
+                      email={row.email}
+                      avatarUrl={row.avatar_url}
+                      isVerified={row.is_email_verified}
+                      selected={selected.indexOf(row.full_name) !== -1}
+                      handleClick={(event) => handleClick(event, row.full_name)}
                     />
                   ))}
 

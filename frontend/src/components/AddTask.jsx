@@ -8,7 +8,6 @@ function AddTask() {
 
   const onSubmit = (title, description, due_date, priority_level, category) => {
     dispatch(addTodo(title, description, due_date, priority_level, category));
-    dispatch(toast({ type: TOAST_TYPE_SUCCESS, message: 'Task added successfully' }));
   };
 
   return <TaskForm task={INITIAL_TASK} submitTask={onSubmit} />;

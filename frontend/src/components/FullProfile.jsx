@@ -34,7 +34,7 @@ export default function FullProfile() {
                 borderRadius: '50%',
                 marginInline: 'auto'
               }}
-              image={ profile.avatar? profile.avatar: 'https://i.pravatar.cc/300?img=11' }
+              image={profile.avatar ? profile.avatar : 'https://i.pravatar.cc/300?img=11'}
               alt="Live from space album cover"
             />
             <CardContent sx={{ flex: '1 0 auto' }}>

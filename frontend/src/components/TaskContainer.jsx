@@ -31,7 +31,11 @@ export default function TaskContainer() {
   useEffect(() => {
     axios
       .get(
-        `/tasks?search_query=${search.query}&page=${page}&size=${pager.size}${filterTasks(filter) != null ? `&status=${filterTasks(filter)}` : ``}${priority != null ? `&priority_level=${priority}` : ``}${dueDate != null ? `&due_date=${dueDate}` : ``}`
+        `/tasks?search_query=${search.query}&page=${page}&size=${pager.size}${
+          filterTasks(filter) != null ? `&status=${filterTasks(filter)}` : ``
+        }${priority != null ? `&priority_level=${priority}` : ``}${
+          dueDate != null ? `&due_date=${dueDate}` : ``
+        }`
       )
       .then((response) => {
         if (response.status == 200) {

@@ -12,8 +12,9 @@
   }
 
   display: flex;
+  row-gap: 1rem;
 
-  @include respond(phone) {
+  @include respond(tab-land) {
     flex-direction: column;
   }
 
@@ -26,11 +27,14 @@
     &__btn:nth-child(2) {
       margin-inline: 1.25rem;
     }
-
-    @include respond(phone) {
+    .filters {
       display: flex;
-      justify-content: space-between;
-      margin-top: 0.9375rem;
+      gap: 1rem;
+      @include respond(phone) {
+        flex-direction: column;
+        justify-content: space-between;
+        margin-top: 0.9375rem;
+      }
     }
   }
 }

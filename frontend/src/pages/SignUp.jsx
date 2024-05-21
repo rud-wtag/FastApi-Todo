@@ -21,9 +21,9 @@ export default function SignUp() {
   const navigate = useNavigate();
 
   const onUpload = (e) => {
-    e.preventDefault()
-    setAvatar(e.target.files[0])
-  }
+    e.preventDefault();
+    setAvatar(e.target.files[0]);
+  };
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -31,7 +31,7 @@ export default function SignUp() {
     formData.append('full_name', password);
     formData.append('email', email);
     formData.append('password', password);
-    avatar? formData.append('avatar', avatar) : '';
+    avatar ? formData.append('avatar', avatar) : '';
 
     axios
       .post('/auth/register', formData)
@@ -85,7 +85,7 @@ export default function SignUp() {
               setPassword(e.target.value);
             }}
           />
-          <FileUpload onUpload={onUpload} title={"Avatar Upload"}/>
+          <FileUpload onUpload={onUpload} title={'Avatar Upload'} />
           <Button
             variant="outlined"
             onClick={(e) => {
