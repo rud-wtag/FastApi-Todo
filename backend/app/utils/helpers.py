@@ -20,3 +20,9 @@ def decode_token(token: str) -> dict:
         token, key=settings.app.secret_key, algorithms=[settings.app.algorithm]
     )
     return payload
+
+
+def get_html():
+    base_path = Path(__file__).parent.parent / "templates"
+    templates = Jinja2Templates(directory=str(base_path))
+    return templates

@@ -9,10 +9,12 @@ from app.core.constants import GUEST, REFRESH_TOKEN, USER
 from app.core.database import get_db
 from app.interface.auth_interface import AuthInterface
 from app.interface.jwt_token_interface import JWTTokenInterface
+from app.interface.user_registration_interface import UserRegistrationInterface
 from app.models.role import Role
 from app.models.user import User
-from app.schema.auth_schema import CreateUserRequest
+from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest
 from app.services.jwt_token_service import JWTTokenService
+from app.services.user_registration_service import UserRegistrationService
 from app.utils.helpers import get_hashed_password, verify_password
 
 
@@ -21,9 +23,13 @@ class AuthService(AuthInterface):
         self,
         db: Session = Depends(get_db),
         jwt_token_service: JWTTokenInterface = Depends(JWTTokenService),
+        user_registration_service: UserRegistrationInterface = Depends(
+            UserRegistrationService
+        ),
     ):
         self.jwt_token_service = jwt_token_service
         self.db = db
+        self.user_registration_service = user_registration_service
 
     def save_role(self, user_role: str = GUEST):
         role = Role(name=user_role)
@@ -40,6 +46,7 @@ class AuthService(AuthInterface):
             )
             self.db.add(user)
             self.db.commit()
+            self.user_registration_service.send_verification_mail(user.email, user.id)
         except IntegrityError as e:
             if "unique constraint" in str(e):
                 raise HTTPException(
@@ -51,6 +58,24 @@ class AuthService(AuthInterface):
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Failed to register user",
                 )
+        return user
+
+    def profile_update(self, user_id, profile_update_request: ProfileUpdateRequest):
+        user = self.db.query(User).filter(User.id == user_id).first()
+
+        if profile_update_request.username:
+            user.email = profile_update_request.username
+            user.is_email_verified = False
+            self.user_registration_service.send_verification_mail(user.email, user.id)
+
+        user.full_name = (
+            profile_update_request.full_name
+            if profile_update_request.full_name
+            else user.full_name
+        )
+
+        self.db.commit()
+        self.db.refresh(user)
         return user
 
     def login(self, email: str, password: str):

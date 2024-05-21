@@ -1,13 +1,19 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, Form, HTTPException, Request, status
+from fastapi import APIRouter, Cookie, Depends, Form, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core.dependencies import get_current_user
-from app.schema.auth_schema import CreateUserRequest, CreateUserResponse
+from app.interface.user_registration_interface import UserRegistrationInterface
+from app.schema.auth_schema import (
+    CreateUserRequest,
+    CreateUserResponse,
+    ProfileUpdateRequest,
+)
 from app.services.auth_service import AuthInterface, AuthService
 from app.services.jwt_token_service import JWTTokenInterface, JWTTokenService
+from app.services.user_registration_service import UserRegistrationService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -29,24 +35,20 @@ async def login_for_access_token(
     auth_service: AuthInterface = Depends(AuthService),
 ):
     tokens = auth_service.login(form_data.username, form_data.password)
-    response = JSONResponse(
-        {
-            "msg": "Logged in successfully",
-        }
-    )
+    response = JSONResponse({"msg": "Logged in successfully"})
     response.set_cookie(
         key="access_token",
         value=tokens["access_token"],
         httponly=True,
-        samesite="none",
         secure=True,
+        samesite="none",
     )
     response.set_cookie(
         key="refresh_token",
         value=tokens["refresh_token"],
         httponly=True,
-        samesite="none",
         secure=True,
+        samesite="none",
     )
     return response
 
@@ -60,6 +62,39 @@ async def profile(
     return response
 
 
+@router.post("/update-profile", response_model=CreateUserResponse)
+async def update_profile(
+    profile_update_request: ProfileUpdateRequest,
+    user: AuthInterface = Depends(get_current_user),
+    auth_service: AuthInterface = Depends(AuthService),
+):
+    updated_user = auth_service.profile_update(user["id"], profile_update_request)
+    return updated_user
+
+
+@router.get("/send-verification-email")
+async def send_verify_email(
+    user: AuthInterface = Depends(get_current_user),
+    user_registration_service: UserRegistrationInterface = Depends(
+        UserRegistrationService
+    ),
+):
+    user_registration_service.send_verification_mail(user["username"], user["id"])
+    return JSONResponse({"msg": "A verification mail sent to your email"})
+
+
+@router.get("/verify-email")
+async def verify_email(
+    token: str,
+    request: Request,
+    user_registration_service: UserRegistrationInterface = Depends(
+        UserRegistrationService
+    ),
+):
+    template = user_registration_service.verify_email(token, request)
+    return template
+
+
 @router.post("/refresh_token")
 async def refresh_token(
     jwt_token_service: JWTTokenInterface = Depends(JWTTokenService),
@@ -70,6 +105,54 @@ async def refresh_token(
     response.set_cookie(
         key="access_token", value=access_token, httponly=True, secure=True
     )
+    return response
+
+
+@router.post("/send-password-reset-link")
+async def password_reset_link(
+    email: Annotated[str, Form()],
+    user_registration_service: UserRegistrationInterface = Depends(
+        UserRegistrationService
+    ),
+):
+    user_registration_service.send_reset_password_link(email)
+    response = JSONResponse({"msg": "Password reset mail sent to your email"})
+    return response
+
+
+@router.post("/reset-password")
+async def password_reset(
+    token: str,
+    new_password: Annotated[str, Form()],
+    user_registration_service: UserRegistrationInterface = Depends(
+        UserRegistrationService
+    ),
+):
+    user_registration_service.reset_password(token, new_password)
+    response = JSONResponse({"msg": "Password reset successful"})
+    response.delete_cookie(
+        key="access_token", samesite="none", secure=True, httponly=True
+    )
+    response.delete_cookie(
+        key="refresh_token", samesite="none", secure=True, httponly=True
+    )
+    return response
+
+
+@router.post("/change-password")
+async def change_password(
+    old_password: Annotated[str, Form()],
+    new_password: Annotated[str, Form()],
+    user: dict = Depends(get_current_user),
+    access_token=Cookie(None),
+    user_registration_service: UserRegistrationInterface = Depends(
+        UserRegistrationService
+    ),
+):
+    user_registration_service.change_password(
+        access_token, new_password, old_password, user
+    )
+    response = JSONResponse({"msg": "Password reset successful"})
     return response
 
 
