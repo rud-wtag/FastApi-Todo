@@ -1,6 +1,16 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, Form, Request, status
+from fastapi import (
+    APIRouter,
+    Body,
+    Cookie,
+    Depends,
+    File,
+    Form,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -12,6 +22,7 @@ from app.schema.auth_schema import (
     ProfileUpdateRequest,
 )
 from app.services.auth_service import AuthInterface, AuthService
+from app.services.image_service import image_service
 from app.services.jwt_token_service import JWTTokenInterface, JWTTokenService
 from app.services.user_registration_service import UserRegistrationService
 
@@ -22,10 +33,20 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     "/register", response_model=CreateUserResponse, status_code=status.HTTP_200_OK
 )
 async def register(
-    create_user_request: CreateUserRequest,
+    full_name: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(..., min_length=6),
+    avatar: UploadFile = File(default=None),
     auth_service: AuthInterface = Depends(AuthService),
 ):
+    avatar_path = None
+    if avatar:
+        avatar_path = image_service.save_image(avatar)
+    create_user_request = CreateUserRequest(
+        full_name=full_name, email=email, password=password, avatar=avatar_path
+    )
     user = auth_service.registration(create_user_request=create_user_request)
+
     return user
 
 

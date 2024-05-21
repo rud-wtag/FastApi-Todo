@@ -10,7 +10,9 @@ certifi==2024.2.2
 cffi==1.16.0
 charset-normalizer==2.0.12
 click==8.1.7
+click-spinner==0.1.10
 coverage==7.4.4
+croniter==1.4.1
 cryptography==42.0.5
 dnspython==2.6.1
 ecdsa==0.18.0
@@ -20,6 +22,7 @@ Faker==25.2.0
 fastapi==0.110.0
 fastapi-mail==1.4.1
 fastapi-pagination==0.12.24
+fastapi-utilities==0.2.0
 freezegun==1.5.0
 greenlet==3.0.3
 h11==0.14.0
