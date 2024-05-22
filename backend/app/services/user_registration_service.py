@@ -10,8 +10,8 @@ from app.core.constants import (
     EMAIL_VERIFICATION_TOKEN,
     RESET_PASSWORD_TOKEN,
 )
-from app.core.database import get_db
 from app.core.mail import mail
+from app.db.database import get_db
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.interface.user_registration_interface import UserRegistrationInterface
 from app.models.user import User
@@ -117,9 +117,7 @@ class UserRegistrationService(UserRegistrationInterface):
 
         return False
 
-    def change_password(
-        self, token: str, new_password: str, old_password: str, user: dict
-    ):
+    def change_password(self, new_password: str, old_password: str, user: dict):
         user_model = self.db.query(User).filter(User.id == user["id"]).first()
 
         if not verify_password(old_password, user_model.password):
@@ -132,7 +130,6 @@ class UserRegistrationService(UserRegistrationInterface):
             user_model.password = get_hashed_password(new_password)
             self.db.commit()
             self.db.refresh(user_model)
-            # self.jwt_token_service.blacklist_token(user["id"], token)
             return True
 
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, details="Invalid token")

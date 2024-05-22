@@ -1,8 +1,15 @@
 from typing import Optional
 
-from fastapi import Form
-from pydantic import BaseModel, EmailStr, Field, computed_field
-from typing_extensions import Annotated
+from email_validator import EmailNotValidError, validate_email
+from fastapi import HTTPException, status
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    Field,
+    ValidationError,
+    computed_field,
+    field_validator,
+)
 
 from app.schema.base_schema import ModelBaseInfo
 from app.services.image_service import image_service
@@ -19,10 +26,22 @@ class BaseUser(BaseModel):
 
 
 class CreateUserRequest(BaseUser):
-    full_name: str = Form(...)
-    email: EmailStr = Form(...)
-    password: str = Form(..., min_length=6)
-    avatar: str = Form(None)
+    full_name: str
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+    avatar: str | None = Field(default=None)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value):
+        try:
+            validate_email(value, check_deliverability=False)
+        except ValidationError:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid email",
+            )
+        return value
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -52,3 +71,8 @@ class CreateUserResponse(BaseUser):
 
     class config:
         fields = {"avatar": "_test"}
+
+
+class FullUserResponse(CreateUserResponse):
+    is_active: bool
+    is_email_verified: bool

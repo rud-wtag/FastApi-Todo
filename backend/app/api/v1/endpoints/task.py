@@ -1,11 +1,11 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
 from app.core.dependencies import auth, get_current_user
+from app.db.database import get_db
 from app.faker.task_faker import create_dummy_tasks
 from app.models.user import User
 from app.schema.task_schema import Task, TaskCreateRequest, TaskUpdateRequest
@@ -33,7 +33,9 @@ def get_all_tasks(
     status: Optional[bool] = None,
     current_user: User = Depends(get_current_user),
 ) -> any:
-    tasks = task_service.get_all_tasks(search_query, category, priority_level, due_date, status, current_user)
+    tasks = task_service.get_all_tasks(
+        search_query, category, priority_level, due_date, status, current_user
+    )
     return tasks
 
 
@@ -46,7 +48,7 @@ def get_task_by_id(
     return task_service.get_task_by_id(current_user, task_id)
 
 
-@router.put("/tasks/{task_id}")
+@router.put("/tasks/{task_id}", response_model=Task)
 def update_task(
     task_id,
     update_task_request: TaskUpdateRequest,

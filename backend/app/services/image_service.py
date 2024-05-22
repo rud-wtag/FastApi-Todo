@@ -1,12 +1,9 @@
 import shutil
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from fastapi import UploadFile
-from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.database import get_db
-from app.models.user import User
 
 
 class ImageService:

@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.constants import GUEST, REFRESH_TOKEN, USER
-from app.core.database import get_db
+from app.db.database import get_db
 from app.interface.auth_interface import AuthInterface
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.interface.user_registration_interface import UserRegistrationInterface

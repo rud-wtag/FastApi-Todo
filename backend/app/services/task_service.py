@@ -5,14 +5,13 @@ from fastapi import Depends, HTTPException, status
 from fastapi_pagination import paginate
 from fastapi_utilities import repeat_at
 from sqlalchemy import create_engine
-from sqlalchemy.future import select
 from sqlalchemy.orm import Session, sessionmaker
 from starlette.background import BackgroundTasks
 
 from app.core.config import settings
 from app.core.constants import ADMIN
-from app.core.database import get_db
 from app.core.mail import mail
+from app.db.database import get_db
 from app.logger import logger
 from app.models.task import Task
 from app.models.user import User
@@ -36,7 +35,9 @@ class TaskService:
         self.db.refresh(new_task)
         return new_task
 
-    def get_all_tasks(self, search_query, category, priority_level, due_date, status, user: dict):
+    def get_all_tasks(
+        self, search_query, category, priority_level, due_date, status, user: dict
+    ):
         tasks = self.db.query(Task)
         if user["role"] != ADMIN:
             tasks = tasks.filter(Task.user_id == user["id"])

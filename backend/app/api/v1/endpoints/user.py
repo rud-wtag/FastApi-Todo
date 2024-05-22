@@ -1,11 +1,9 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Cookie, Depends, Form, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 
-from app.core.dependencies import admin, get_current_user
+from app.core.dependencies import admin
 from app.interface.user_registration_interface import UserRegistrationInterface
-from app.schema.auth_schema import CreateUserResponse
+from app.schema.auth_schema import CreateUserResponse, FullUserResponse
 from app.services.auth_service import AuthInterface, AuthService
 from app.services.jwt_token_service import JWTTokenInterface, JWTTokenService
 from app.services.user_service import UserService
@@ -13,7 +11,7 @@ from app.services.user_service import UserService
 router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(admin)])
 
 
-@router.get("", response_model=list[CreateUserResponse])
+@router.get("", response_model=list[FullUserResponse])
 async def get_all_user(
     user_service: UserService = Depends(UserService),
 ):
@@ -21,7 +19,7 @@ async def get_all_user(
     return users
 
 
-@router.get("/{user_id}", response_model=CreateUserResponse)
+@router.get("/{user_id}", response_model=FullUserResponse)
 async def get_user(
     user_id,
     user_service: UserService = Depends(UserService),

@@ -44,7 +44,7 @@ def auth(user: dict = Depends(get_current_user)):
 
 
 def active_user(user: dict = Depends(get_current_user)):
-    if user["status"] is not None and user["status"] == True:
+    if user["is_active"] is not None and user["is_active"] is True:
         return user
     else:
         raise HTTPException(
@@ -54,10 +54,10 @@ def active_user(user: dict = Depends(get_current_user)):
 
 
 def email_verified(user: dict = Depends(get_current_user)):
-    if user["is_email_verified"] is not None and user["is_email_verified"] == True:
+    if user["is_email_verified"] is not None and user["is_email_verified"] is True:
         return user
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Your email is not verified please verify you email first",
+            detail="Your email is not verified please verify your email first",
         )

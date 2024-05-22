@@ -2,17 +2,18 @@ from typing import Annotated
 
 from fastapi import (
     APIRouter,
-    Body,
     Cookie,
     Depends,
     File,
     Form,
+    HTTPException,
     Request,
     UploadFile,
     status,
 )
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import ValidationError
 
 from app.core.dependencies import get_current_user
 from app.interface.user_registration_interface import UserRegistrationInterface
@@ -42,9 +43,15 @@ async def register(
     avatar_path = None
     if avatar:
         avatar_path = image_service.save_image(avatar)
-    create_user_request = CreateUserRequest(
-        full_name=full_name, email=email, password=password, avatar=avatar_path
-    )
+    try:
+        create_user_request = CreateUserRequest(
+            full_name=full_name, email=email, password=password, avatar=avatar_path
+        )
+    except ValidationError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Email it not valid",
+        )
     user = auth_service.registration(create_user_request=create_user_request)
 
     return user
