@@ -5,7 +5,6 @@ from fastapi import Depends, HTTPException, status
 from fastapi_pagination import paginate
 from fastapi_utilities import repeat_at
 from sqlalchemy import create_engine
-from sqlalchemy.future import select
 from sqlalchemy.orm import Session, sessionmaker
 from starlette.background import BackgroundTasks
 

@@ -1,8 +1,6 @@
 from typing import Optional
 
-from fastapi import Form
 from pydantic import BaseModel, EmailStr, Field, computed_field
-from typing_extensions import Annotated
 
 from app.schema.base_schema import ModelBaseInfo
 from app.services.image_service import image_service
