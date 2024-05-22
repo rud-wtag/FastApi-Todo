@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String
 
-from app.core.base import Base
+from app.db.base import Base
 from app.models.base_model import BaseModel
 
 

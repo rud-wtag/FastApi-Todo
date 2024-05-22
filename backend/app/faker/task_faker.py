@@ -4,7 +4,7 @@ from faker import Faker
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
+from app.db.database import get_db
 from app.models.task import Task
 
 

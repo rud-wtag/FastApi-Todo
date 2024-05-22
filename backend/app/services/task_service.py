@@ -11,8 +11,8 @@ from starlette.background import BackgroundTasks
 
 from app.core.config import settings
 from app.core.constants import ADMIN
-from app.core.database import get_db
 from app.core.mail import mail
+from app.db.database import get_db
 from app.logger import logger
 from app.models.task import Task
 from app.models.user import User

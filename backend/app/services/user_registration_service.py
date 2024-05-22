@@ -10,8 +10,8 @@ from app.core.constants import (
     EMAIL_VERIFICATION_TOKEN,
     RESET_PASSWORD_TOKEN,
 )
-from app.core.database import get_db
 from app.core.mail import mail
+from app.db.database import get_db
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.interface.user_registration_interface import UserRegistrationInterface
 from app.models.user import User
