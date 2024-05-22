@@ -7,10 +7,11 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.constants import ACCESS_TOKEN, USER
-from app.core.database import get_db
+from app.db.database import get_db
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.models.token import Token
 from app.models.user import User
+from app.services.image_service import image_service
 from app.utils.helpers import decode_token
 
 
@@ -110,8 +111,11 @@ class JWTTokenService(JWTTokenInterface):
         return {
             "id": user_id,
             "username": username,
+            "avatar": image_service.get_file(user.avatar),
             "full_name": user.full_name,
             "role": user.role.name,
+            "is_email_verified": user.is_email_verified,
+            "is_active": user.is_active,
             "token_type": token_type,
         }
 

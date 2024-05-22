@@ -59,6 +59,7 @@ class AppSettings:
     forget_password_link_expire_minutes: int = int(
         os.getenv("FORGET_PASSWORD_LINK_EXPIRE_MINUTES")
     )
+    asset_directory: str = os.getenv("ASSET_DIRECTORY")
 
 
 @dataclass
@@ -70,7 +71,7 @@ class CorsSettings:
         "http://localhost:3001",
     ]
     methods = ["*"]
-    headers = ["*"]
+    headers = ["PUT", "GET", "POST", "PATCH"]
 
 
 @dataclass

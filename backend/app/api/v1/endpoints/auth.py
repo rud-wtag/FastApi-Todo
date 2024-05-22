@@ -1,8 +1,19 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, Form, Request, status
+from fastapi import (
+    APIRouter,
+    Cookie,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import ValidationError
 
 from app.core.dependencies import get_current_user
 from app.interface.user_registration_interface import UserRegistrationInterface
@@ -12,6 +23,7 @@ from app.schema.auth_schema import (
     ProfileUpdateRequest,
 )
 from app.services.auth_service import AuthInterface, AuthService
+from app.services.image_service import image_service
 from app.services.jwt_token_service import JWTTokenInterface, JWTTokenService
 from app.services.user_registration_service import UserRegistrationService
 
@@ -22,10 +34,26 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     "/register", response_model=CreateUserResponse, status_code=status.HTTP_200_OK
 )
 async def register(
-    create_user_request: CreateUserRequest,
+    full_name: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(..., min_length=6),
+    avatar: UploadFile = File(default=None),
     auth_service: AuthInterface = Depends(AuthService),
 ):
+    avatar_path = None
+    if avatar:
+        avatar_path = image_service.save_image(avatar)
+    try:
+        create_user_request = CreateUserRequest(
+            full_name=full_name, email=email, password=password, avatar=avatar_path
+        )
+    except ValidationError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Email it not valid",
+        )
     user = auth_service.registration(create_user_request=create_user_request)
+
     return user
 
 
@@ -35,7 +63,7 @@ async def login_for_access_token(
     auth_service: AuthInterface = Depends(AuthService),
 ):
     tokens = auth_service.login(form_data.username, form_data.password)
-    response = JSONResponse({"msg": "Logged in successfully"})
+    response = JSONResponse({"msg": "Logged in successfully", "user": tokens["user"]})
     response.set_cookie(
         key="access_token",
         value=tokens["access_token"],
@@ -153,6 +181,12 @@ async def change_password(
         access_token, new_password, old_password, user
     )
     response = JSONResponse({"msg": "Password reset successful"})
+    response.delete_cookie(
+        key="access_token", samesite="none", secure=True, httponly=True
+    )
+    response.delete_cookie(
+        key="refresh_token", samesite="none", secure=True, httponly=True
+    )
     return response
 
 

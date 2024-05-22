@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.constants import GUEST, REFRESH_TOKEN, USER
-from app.core.database import get_db
+from app.db.database import get_db
 from app.interface.auth_interface import AuthInterface
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.interface.user_registration_interface import UserRegistrationInterface
@@ -92,13 +92,22 @@ class AuthService(AuthInterface):
                 detail="Invalid credentials",
             )
         access_token = self.jwt_token_service.create_token(
-            user.email, user.id, timedelta(minutes=20)
+            user.email, user.id, timedelta(days=1)
         )
 
         refresh_token = self.jwt_token_service.create_token(
             user.email, user.id, timedelta(days=7), type=REFRESH_TOKEN
         )
-        return {"access_token": access_token, "refresh_token": refresh_token}
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "name": user.full_name,
+                "role": user.role.name,
+            },
+        }
 
     def logout(self, user: dict, access_token: str, refresh_token: str):
         response = JSONResponse({"msg": "Logged out!"})
