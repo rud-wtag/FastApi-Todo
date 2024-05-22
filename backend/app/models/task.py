@@ -1,8 +1,8 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from app.core.base import Base
 from app.core.constants import LOW
+from app.db.base import Base
 from app.models.base_model import BaseModel
 from app.models.user import User
 
