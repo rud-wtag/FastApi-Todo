@@ -5,6 +5,7 @@ from fastapi import Cookie
 from freezegun import freeze_time
 
 from app.tests.conftest import TASK, USER, insert_user_data
+from app.logger import logger
 
 
 # @patch('app.models.base_model.datetime')
@@ -19,6 +20,7 @@ def test_create_task(client, insert_user_data):
 
     cookie = {"access_token": login_response.cookies.get("access_token")}
     response = client.post("/api/v1/tasks", cookies=cookie, json=TASK)
+    logger.info(response)
     assert response.status_code == 200
     response_data = response.json()
     response_data.pop("created_at", None)
@@ -29,7 +31,7 @@ def test_create_task(client, insert_user_data):
         "user_id": 1,
         "category": "Work",
         "status": False,
-        "due_date": "2024-05-23T00:00:00",
+        "due_date": "2024-05-30T00:00:00",
         "id": 1,
         "priority_level": "LOW",
         "completed_at": None,
@@ -82,7 +84,7 @@ def test_get_task_by_id(client, insert_user_data):
         "description": "Finish the report",
         "category": "Work",
         "status": False,
-        "due_date": "2024-05-23T00:00:00",
+        "due_date": "2024-05-30T00:00:00",
         "task_state": "incomplete",
         "priority_level": "LOW",
         "completed_at": None,
