@@ -4,6 +4,8 @@ from datetime import datetime
 from fastapi import UploadFile
 
 from app.core.config import settings
+from app.db.database import get_db
+from app.models.user import User
 
 
 class ImageService:

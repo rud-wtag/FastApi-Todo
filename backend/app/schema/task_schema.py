@@ -25,6 +25,8 @@ class Task(ModelBaseInfo, BaseModel):
     @property
     def task_state(self) -> str:
         current_time = datetime.now(pytz.utc)  # Ensure current time is timezone-aware
+        if self.due_date.tzinfo is None:
+            current_time = datetime.now()
         if self.completed_at:
             if self.completed_at < self.due_date:
                 return "complete"
