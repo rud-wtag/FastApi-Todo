@@ -2,10 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.core.constants import ACCESS_TOKEN, ADMIN, REFRESH_TOKEN
-from app.models.user import User
-from app.schema.auth_schema import CreateUserRequest
-from app.services.auth_service import AuthService
+from app.core.constants import ADMIN
 from app.services.jwt_token_service import JWTTokenService
 from app.services.user_registration_service import UserRegistrationService
 

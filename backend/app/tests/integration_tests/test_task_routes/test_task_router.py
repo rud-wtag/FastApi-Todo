@@ -1,10 +1,7 @@
-from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi import Cookie
-from freezegun import freeze_time
 
-from app.tests.conftest import TASK, USER, insert_user_data
+from app.tests.conftest import TASK, USER
 from app.logger import logger
 
 

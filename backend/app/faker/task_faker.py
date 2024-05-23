@@ -3,7 +3,6 @@ from datetime import datetime
 from faker import Faker
 from sqlalchemy.orm import Session
 
-from app.db.database import get_db
 from app.models.task import Task
 
 

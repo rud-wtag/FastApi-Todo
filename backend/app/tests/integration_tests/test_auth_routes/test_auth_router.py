@@ -1,6 +1,5 @@
-from fastapi import Cookie
 
-from app.tests.conftest import USER, insert_user_data
+from app.tests.conftest import USER
 
 
 def test_create_user(client):

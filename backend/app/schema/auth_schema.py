@@ -1,6 +1,6 @@
 from typing import Optional
 
-from email_validator import EmailNotValidError, validate_email
+from email_validator import validate_email
 from fastapi import HTTPException, status
 from pydantic import (
     BaseModel,

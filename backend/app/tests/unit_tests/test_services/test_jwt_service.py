@@ -53,7 +53,7 @@ class TestJwtTokenService:
         )
 
         if not token_db_value:
-            assert result == False
+            assert result is False
         else:
             assert mock_db_session.commit.called
             assert mock_db_session.refresh.called
@@ -79,7 +79,7 @@ class TestJwtTokenService:
         )
 
         if not stored_db_token:
-            assert result == False
+            assert result is False
         else:
             assert mock_db_session.commit.called
             assert mock_db_session.refresh.called
