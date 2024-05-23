@@ -9,7 +9,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.config import settings
-from app.core.constants import ADMIN, USER as ROLE_USER
+from app.core.constants import ADMIN
+from app.core.constants import USER as ROLE_USER
 from app.db.base import Base
 from app.db.database import get_db
 from app.faker.task_faker import create_dummy_tasks

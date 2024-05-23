@@ -1,4 +1,3 @@
-
 from app.tests.conftest import USER
 
 

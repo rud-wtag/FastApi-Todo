@@ -1,8 +1,7 @@
-
 import pytest
 
-from app.tests.conftest import TASK, USER
 from app.logger import logger
+from app.tests.conftest import TASK, USER
 
 
 # @patch('app.models.base_model.datetime')
