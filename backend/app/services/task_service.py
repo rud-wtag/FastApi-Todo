@@ -51,7 +51,7 @@ class TaskService:
             tasks = tasks.filter(Task.due_date == datetime.fromisoformat(due_date))
         if status:
             tasks = tasks.filter(Task.status == status)
-        if status == False:
+        if status is False:
             tasks = tasks.filter(Task.status == False)
         return paginate(tasks.order_by(Task.created_at.desc()).all())
 
@@ -113,7 +113,7 @@ class TaskService:
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Task not Found",
+            detail="Task not Found",
         )
 
     def mark_as_incomplete(self, task_id: int, user: dict):
@@ -129,7 +129,7 @@ class TaskService:
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Task not Found",
+            detail="Task not Found",
         )
 
     # @repeat_at(cron="*/1 * * * *")

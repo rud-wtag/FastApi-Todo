@@ -1,10 +1,8 @@
-from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from app.core.constants import ACCESS_TOKEN, ADMIN, REFRESH_TOKEN
-from app.models.user import User
 from app.schema.auth_schema import CreateUserRequest
 from app.services.auth_service import AuthService
 from app.services.jwt_token_service import JWTTokenService
@@ -27,7 +25,7 @@ class TestAuthService:
 
             assert mock_db_session.add.called
             assert mock_db_session.commit.called
-            assert result == None
+            assert result is None
             mock_db_session.add.assert_called_once_with(ADMIN)
             mock_role_class.assert_called_with(name=ADMIN)
 

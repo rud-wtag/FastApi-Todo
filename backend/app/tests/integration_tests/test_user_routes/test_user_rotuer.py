@@ -1,7 +1,5 @@
-from fastapi import Cookie
 
-from app.tests.conftest import USER, insert_user_data
-from app.logger import logger
+from app.tests.conftest import USER
 
 
 def test_get_all_users(client, insert_user_data):
