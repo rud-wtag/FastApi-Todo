@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 
 from app.core.dependencies import admin
+from app.interface.user_interface import UserInterface
 from app.interface.user_registration_interface import UserRegistrationInterface
 from app.schema.auth_schema import CreateUserResponse, FullUserResponse
 from app.services.auth_service import AuthInterface, AuthService
@@ -13,7 +14,7 @@ router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(admin)
 
 @router.get("", response_model=list[FullUserResponse])
 async def get_all_user(
-    user_service: UserService = Depends(UserService),
+    user_service: UserInterface = Depends(UserService),
 ):
     users = user_service.get_all_users()
     return users
@@ -28,20 +29,20 @@ async def get_user(
     return user
 
 
-@router.put("/{user_id}/deactivate")
-def deactivate_user(user_id: int, user_service: UserService = Depends(UserService)):
-    if user_service.deactivate_user(user_id):
-        return {"message": "User deactivated successfully"}
+@router.put("/{user_id}/activate")
+def activate_user(user_id: int, user_service: UserService = Depends(UserService)):
+    if user_service.activate_user(user_id):
+        return {"message": "User activated successfully"}
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
 
-@router.put("/{user_id}/activate")
-def activate_user(user_id: int, user_service: UserService = Depends(UserService)):
-    if user_service.activate_user(user_id):
-        return {"message": "User activated successfully"}
+@router.put("/{user_id}/deactivate")
+def deactivate_user(user_id: int, user_service: UserService = Depends(UserService)):
+    if user_service.deactivate_user(user_id):
+        return {"message": "User deactivated successfully"}
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
