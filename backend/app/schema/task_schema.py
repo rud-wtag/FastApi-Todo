@@ -42,7 +42,7 @@ class TaskCreateRequest(BaseModel):
     category: str = Field(min_length=3)
     description: str = Field(min_length=1)
     priority_level: Optional[str] = "LOW"
-    due_date: datetime
+    due_date: datetime = Field(default=datetime.now() + timedelta(days=1))
 
     @field_validator("due_date")
     @classmethod

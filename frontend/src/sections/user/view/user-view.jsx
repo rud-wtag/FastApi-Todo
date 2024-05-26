@@ -39,6 +39,8 @@ export default function UserPage() {
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const [action, setAction] = useState('fetch')
+
   useEffect(() => {
     axios
       .get('/users')
@@ -50,7 +52,7 @@ export default function UserPage() {
       .catch((error) => {
         dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Unable to load user' }));
       });
-  }, []);
+  }, [action]);
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -113,10 +115,6 @@ export default function UserPage() {
     <Container>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Users</Typography>
-
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
-          New User
-        </Button>
       </Stack>
 
       <Card>
@@ -151,6 +149,7 @@ export default function UserPage() {
                   .map((row) => (
                     <UserTableRow
                       key={row.id}
+                      userId = { row.id }
                       full_name={row.full_name}
                       role={row.role_id}
                       status={row.is_active}
@@ -159,6 +158,7 @@ export default function UserPage() {
                       isVerified={row.is_email_verified}
                       selected={selected.indexOf(row.full_name) !== -1}
                       handleClick={(event) => handleClick(event, row.full_name)}
+                      setAction = {setAction}
                     />
                   ))}
 

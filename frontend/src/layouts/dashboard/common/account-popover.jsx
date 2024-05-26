@@ -10,6 +10,12 @@ import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/material/styles';
 
 import { account } from '_mock/account';
+import { useSelector } from 'react-redux';
+
+import { useCookies } from 'react-cookie';
+import { useDispatch } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios'
 
 // ----------------------------------------------------------------------
 
@@ -32,6 +38,10 @@ const MENU_OPTIONS = [
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+  const profile = useSelector((state) => state.appStates.profile);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [cookies, setCookie, removeCookie] = useCookies(['cookie-name']);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -39,6 +49,23 @@ export default function AccountPopover() {
 
   const handleClose = () => {
     setOpen(null);
+  };
+
+  const logout = (e) => {
+    e.preventDefault();
+    axios
+      .get('/auth/logout')
+      .then((res) => {
+        if (res.status == 200) {
+          handleClose()
+          removeCookie('profile');
+          dispatch(setLoggedIn(false));
+          navigate('/sign-in');
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -56,8 +83,8 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={account.photoURL}
-          alt={account.displayName}
+          src={profile.avatar ? profile.avatar : 'https://i.pravatar.cc/300?img=11'}
+          alt={profile?.full_name}
           sx={{
             width: 36,
             height: 36,
@@ -85,10 +112,10 @@ export default function AccountPopover() {
       >
         <Box sx={{ my: 1.5, px: 2 }}>
           <Typography variant="subtitle2" noWrap>
-            {account.displayName}
+            {profile?.full_name}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {account.email}
+            {profile?.username}
           </Typography>
         </Box>
 
@@ -99,7 +126,7 @@ export default function AccountPopover() {
         <MenuItem
           disableRipple
           disableTouchRipple
-          onClick={handleClose}
+          onClick={(e) => logout(e)}
           sx={{ typography: 'body2', color: 'error.main', py: 1.5 }}
         >
           Logout

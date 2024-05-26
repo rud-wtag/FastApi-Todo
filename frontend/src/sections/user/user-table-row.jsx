@@ -13,10 +13,12 @@ import Typography from '@mui/material/Typography';
 
 import Iconify from 'components/iconify';
 import Label from 'components/label';
-
+import axios from 'axios'
+import { toast } from 'react-toastify';
 // ----------------------------------------------------------------------
 
 export default function UserTableRow({
+  userId,
   selected,
   full_name,
   avatarUrl,
@@ -24,7 +26,8 @@ export default function UserTableRow({
   role,
   isVerified,
   status,
-  handleClick
+  handleClick,
+  setAction
 }) {
   const [open, setOpen] = useState(null);
 
@@ -35,6 +38,48 @@ export default function UserTableRow({
   const handleCloseMenu = () => {
     setOpen(null);
   };
+
+  const onActivate = () => {
+    axios.put(`/users/${userId}/activate`)
+    .then(res => {
+      if (res.status == 200){
+        toast.success('🦄 User activated');
+        setAction(`user ${userId} activated`)
+        handleCloseMenu()
+      }
+    })
+    .catch(err=>{
+      toast.error('🦄 User can not activated');
+    })
+  }
+  const onDeactivate = () => {
+    axios.put(`/users/${userId}/deactivate`)
+    .then(res => {
+      console.log(res)
+      if (res.status == 200){
+        toast.success('User deactivated');
+        setAction(`user ${userId} deactivated`)
+        handleCloseMenu()
+      }
+    })
+    .catch(err=>{
+      toast.error('User can not be deactivated');
+    })
+  }
+  const onDelete = () => {
+    axios.delete(`/users/${userId}`)
+    .then(res => {
+      console.log(res)
+      if (res.status == 200){
+        toast.success('User deleted');
+        setAction(`user ${userId} deleted`)
+        handleCloseMenu()
+      }
+    })
+    .catch(err=>{
+      toast.error('User can not be deleted');
+    })
+  }
 
   return (
     <>
@@ -54,7 +99,7 @@ export default function UserTableRow({
 
         <TableCell>{email}</TableCell>
 
-        <TableCell>{role}</TableCell>
+        <TableCell>{role == 1? 'Admin': 'User'}</TableCell>
 
         <TableCell align="center">{isVerified ? 'Yes' : 'No'}</TableCell>
 
@@ -81,12 +126,22 @@ export default function UserTableRow({
           sx: { width: 140 }
         }}
       >
-        <MenuItem onClick={handleCloseMenu}>
-          <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
-          Edit
-        </MenuItem>
+        {
+          !status && 
+          (<MenuItem onClick={onActivate}>
+            <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
+            Activate
+          </MenuItem>)
+        }
+        {
+          status &&
+          <MenuItem onClick={onDeactivate}>
+            <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
+            Deactivate
+          </MenuItem>
+        }
 
-        <MenuItem onClick={handleCloseMenu} sx={{ color: 'error.main' }}>
+        <MenuItem onClick={onDelete} sx={{ color: 'error.main' }}>
           <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
           Delete
         </MenuItem>

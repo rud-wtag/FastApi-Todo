@@ -35,13 +35,13 @@ export default function ChangePassword() {
       .then((response) => {
         console.log(response, response.status);
         if (response.status == 200) {
-          dispatch(toast({ type: TOAST_TYPE_SUCCESS, message: 'Password reset successful' }));
           navigate('/sign-in');
+          dispatch(toast({ type: TOAST_TYPE_SUCCESS, message: 'Password reset successful!' }));
         }
       })
       .catch((error) => {
         console.log(error.response.data?.detail);
-        dispatch(toast({ type: TOAST_TYPE_ERROR, message: error.detail }));
+        dispatch(toast({ type: TOAST_TYPE_ERROR, message: error.response.data.detail }));
       });
   };
   return (

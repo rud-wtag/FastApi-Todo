@@ -20,7 +20,7 @@ export default function TaskContainer() {
   const isNewTaskRequested = useSelector((state) => state.todoStates.isNewTaskRequested);
   const [page, setPage] = useState(1);
   const isTasksAvailable = tasks.length || isNewTaskRequested;
-  const isPaginationAvailable = true;
+  const isPaginationAvailable = pager.pages > 0 ;
   const dispatch = useDispatch();
 
   const handleChange = (e, value) => {

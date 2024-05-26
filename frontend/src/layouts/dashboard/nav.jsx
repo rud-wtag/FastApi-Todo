@@ -22,11 +22,13 @@ import Scrollbar from 'components/scrollbar';
 
 import { NAV } from './config-layout';
 import navConfig from './config-navigation';
+import { useSelector } from 'react-redux';
 
 // ----------------------------------------------------------------------
 
 export default function Nav({ openNav, onCloseNav }) {
   const pathname = usePathname();
+  const profile = useSelector((state) => state.appStates.profile);
 
   const upLg = useResponsive('up', 'lg');
 
@@ -50,10 +52,10 @@ export default function Nav({ openNav, onCloseNav }) {
         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12)
       }}
     >
-      <Avatar src={account.photoURL} alt="photoURL" />
+      <Avatar src={profile.avatar ? profile.avatar : 'https://i.pravatar.cc/300?img=11'} alt="photoURL" />
 
       <Box sx={{ ml: 2 }}>
-        <Typography variant="subtitle2">{account.displayName}</Typography>
+        <Typography variant="subtitle2">{profile?.full_name}</Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           {account.role}

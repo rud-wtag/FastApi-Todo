@@ -1,7 +1,7 @@
 import { actionTypes } from 'redux/constants/ActionTypes';
 import { INITIAL_TASK, TOAST_TYPE_ERROR } from 'utils/constants';
 import axios from 'axios';
-
+import dayjs from 'dayjs';
 export const addTodo = (title, description, due_date, priority_level, category) => {
   return async (dispatch) => {
     const task = {
@@ -12,7 +12,7 @@ export const addTodo = (title, description, due_date, priority_level, category) 
       category,
       createdAt: new Date().toISOString()
     };
-
+    console.log(task)
     axios
       .post('/tasks', task)
       .then((res) => {

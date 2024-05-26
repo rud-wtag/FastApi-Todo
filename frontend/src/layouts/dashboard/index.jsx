@@ -6,7 +6,8 @@ import Box from '@mui/material/Box';
 import Nav from './nav';
 import Main from './main';
 import Header from './header';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 // ----------------------------------------------------------------------
 
 export default function DashboardLayout({ children }) {
@@ -15,7 +16,6 @@ export default function DashboardLayout({ children }) {
   return (
     <>
       <Header onOpenNav={() => setOpenNav(true)} />
-
       <Box
         sx={{
           minHeight: 1,
@@ -24,7 +24,19 @@ export default function DashboardLayout({ children }) {
         }}
       >
         <Nav openNav={openNav} onCloseNav={() => setOpenNav(false)} />
-
+        <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        />
+        <ToastContainer />
         <Main>{children}</Main>
       </Box>
     </>

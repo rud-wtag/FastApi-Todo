@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 
-from app.core.dependencies import admin
+from app.core.dependencies import admin, get_current_user
 from app.interface.user_interface import UserInterface
+from app.models.user import User
 from app.schema.auth_schema import FullUserResponse
 from app.services.user_service import UserService
 
@@ -49,8 +50,9 @@ def deactivate_user(user_id: int, user_service: UserService = Depends(UserServic
 @router.delete("/{user_id}")
 async def delete_user(
     user_id,
+    current_user: User = Depends(get_current_user),
     user_service: UserService = Depends(UserService),
 ):
-    user = user_service.delete_user(user_id)
+    user = user_service.delete_user(user_id, current_user)
     response = JSONResponse(user)
     return response

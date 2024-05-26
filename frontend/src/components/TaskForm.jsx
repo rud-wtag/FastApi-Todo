@@ -42,7 +42,7 @@ function TaskForm({ isEditMode = false, task, submitTask }) {
       return;
     }
     setError(null);
-    submitTask(validateTitle.text, validateDetails.text, dueDate, priorityLevel, category);
+    submitTask(validateTitle.text, validateDetails.text, dueDate ? dayjs().toISOString(): dueDate, priorityLevel, category);
     dispatch(setIsNewTaskRequested(false));
     setTaskTitle('');
   }
@@ -80,6 +80,7 @@ function TaskForm({ isEditMode = false, task, submitTask }) {
           fullWidth="true"
           label="Title"
           value={title}
+          required={true}
         />
         <textarea
           className="task__input"
@@ -98,6 +99,7 @@ function TaskForm({ isEditMode = false, task, submitTask }) {
             value={priorityLevel}
             label="Priority Level"
             onChange={(e) => setPriorityLevel(e.target.value)}
+            required={true}
           >
             <MenuItem value={'LOW'}>LOW</MenuItem>
             <MenuItem value={'MEDIUM'}>MEDIUM</MenuItem>
@@ -112,6 +114,7 @@ function TaskForm({ isEditMode = false, task, submitTask }) {
             value={category}
             label="Category"
             onChange={(e) => setCategory(e.target.value)}
+            required={true}
           >
             <MenuItem value={'personal'}>personal</MenuItem>
             <MenuItem value={'project'}>project</MenuItem>
