@@ -56,13 +56,13 @@ class UserRegistrationService(UserRegistrationInterface):
 
         if user["token_type"] == EMAIL_VERIFICATION_TOKEN and user:
             user_model = self.db.query(User).filter(User.id == user["id"]).first()
+            template = get_html()
 
             if user_model and not user_model.is_email_verified:
                 user_model.is_email_verified = True
                 self.db.commit()
                 self.db.refresh(user_model)
                 self.jwt_token_service.blacklist_token(user["id"], token)
-                template = get_html()
 
                 return template.TemplateResponse(
                     "email-verification-success.html",

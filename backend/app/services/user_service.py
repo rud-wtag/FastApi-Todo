@@ -2,10 +2,11 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
+from app.interface.user_interface import UserInterface
 from app.models.user import User
 
 
-class UserService:
+class UserService(UserInterface):
     def __init__(self, db: Session = Depends(get_db)):
         self.db = db
 
@@ -15,19 +16,19 @@ class UserService:
     def get_user(self, user_id: int):
         return self.db.query(User).filter(User.id == user_id).first()
 
-    def deactivate_user(self, user_id: int):
+    def activate_user(self, user_id: int):
         user = self.db.query(User).filter(User.id == user_id).first()
         if user:
-            user.is_active = False
+            user.is_active = True
             self.db.commit()
             return True
         else:
             return False
 
-    def activate_user(self, user_id: int):
+    def deactivate_user(self, user_id: int):
         user = self.db.query(User).filter(User.id == user_id).first()
         if user:
-            user.is_active = True
+            user.is_active = False
             self.db.commit()
             return True
         else:
