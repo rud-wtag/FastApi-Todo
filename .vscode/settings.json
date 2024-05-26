@@ -1,11 +1,15 @@
 {
-  // Theme
   "workbench.colorTheme": "Default Dark+",
 
-  // config related to code formatting
   "editor.fontSize": 16,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+  },
+  "ruff.lint.args": ["--config=backend/.ruff.toml"],
   "[javascript]": {
     "editor.formatOnSave": false,
     "editor.defaultFormatter": null
@@ -14,7 +18,7 @@
     "editor.formatOnSave": false,
     "editor.defaultFormatter": null
   },
-  "javascript.validate.enable": false, //disable all built-in syntax checking
+  "javascript.validate.enable": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true,
     "source.fixAll.tslint": true,
@@ -24,7 +28,6 @@
   "eslint.options": {
     "overrideConfigFile": ".eslintrc.json"
   },
-  // emmet
   "emmet.triggerExpansionOnTab": true,
   "emmet.includeLanguages": {
     "javascript": "javascriptreact"
