@@ -3,7 +3,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from app.core.constants import ACCESS_TOKEN, ADMIN, REFRESH_TOKEN
-from app.schema.auth_schema import CreateUserRequest
+from app.models.user import User
+from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest
 from app.services.auth_service import AuthService
 from app.services.jwt_token_service import JWTTokenService
 
@@ -29,7 +30,6 @@ class TestAuthService:
             mock_db_session.add.assert_called_once_with(ADMIN)
             mock_role_class.assert_called_with(name=ADMIN)
 
-    @pytest.mark.skip(reason="will update later")
     @patch("app.services.auth_service.get_hashed_password")
     @patch("app.services.auth_service.User")
     @patch("app.services.auth_service.UserRegistrationService")
@@ -55,7 +55,8 @@ class TestAuthService:
         auth_service = AuthService(
             db=mock_db_session, user_registration_service=mock_user_registration_service
         )
-        mock_user_class.return_value = request_data
+        mock_user = User(**request_data)
+        mock_user_class.return_value = mock_user
         mock_bcrypt_context.return_value = request_data["password"]
         mock_db_session.query().filter().first.return_value = None
         mock_db_session.commit.return_value = request_data
@@ -63,17 +64,55 @@ class TestAuthService:
 
         user = auth_service.registration(create_user_request)
 
-        mock_db_session.add.assert_called_once_with(request_data)
+        mock_db_session.add.assert_called_once_with(mock_user)
         mock_user_registration_service.send_verification_mail.assert_called_once_with(
             request_data["email"], request_data["id"]
         )
         assert mock_db_session.commit.called
-        assert user == request_data
+        assert user == mock_user
         mock_user_class.assert_called_once_with(
             **create_user_request.model_dump(exclude=["password", "role_id"]),
             password=request_data["password"],
             role_id=None,
         )
+
+    @patch("app.services.auth_service.User")
+    @patch("app.services.auth_service.UserRegistrationService")
+    def test_registration(
+        self,
+        mock_user_registration_service,
+        mock_user_class,
+        mock_db_session,
+    ):
+        request_data = {
+            "id": 1,
+            "full_name": "Mr. A",
+            "email": "demo@mail.com",
+            "password": "secret",
+        }
+
+        auth_service = AuthService(
+            db=mock_db_session, user_registration_service=mock_user_registration_service
+        )
+        mock_user = User(**request_data)
+        mock_user_class.return_value = mock_user
+        mock_db_session.query().filter().first.return_value = mock_user
+        mock_db_session.commit.return_value = request_data
+        mock_user_registration_service.send_verification_mail.return_value = True
+
+        profile_update_request = ProfileUpdateRequest(
+            full_name=request_data["full_name"], username=request_data["email"]
+        )
+
+        user = auth_service.profile_update(request_data["id"], profile_update_request)
+
+        mock_db_session.query.assert_called_with(mock_user_class)
+        mock_user_registration_service.send_verification_mail.assert_called_once_with(
+            request_data["email"], request_data["id"]
+        )
+        mock_db_session.commit.assert_called_once
+        mock_db_session.refresh.assert_called_once_with(user)
+        assert user.email == request_data["email"]
 
     @patch("app.services.auth_service.verify_password")
     @patch("app.services.auth_service.User")
@@ -128,7 +167,9 @@ class TestAuthService:
             db=mock_db_session, jwt_token_service=mock_jwt_token_service
         )
 
-        result = auth_service.logout(user, data["access_token"], data["refresh_token"])
+        result = auth_service.logout(
+            user["id"], data["access_token"], data["refresh_token"]
+        )
 
         json_response_instance = json_response_class.return_value
         json_response_instance.delete_cookie.assert_any_call(
