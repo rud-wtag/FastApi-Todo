@@ -1,3 +1,4 @@
+import warnings
 from datetime import datetime
 from typing import Generator
 from unittest.mock import MagicMock
@@ -36,7 +37,7 @@ USER = {"full_name": "Mr. A", "email": "demo@mail.com", "password": "secret"}
 TASK = {
     "category": "Work",
     "description": "Finish the report",
-    "due_date": "2024-05-30T00:00:00",
+    "due_date": "2024-06-15T00:00:00",
     "title": "Demo task title",
 }
 
@@ -135,3 +136,9 @@ def insert_task_data(test_session):
     db.refresh(new_task)
 
     create_dummy_tasks(db, user.id, 100)
+
+
+@pytest.fixture(autouse=True)
+def suppress_deprecation_warnings():
+    warnings.filterwarnings("ignore", category=DeprecationWarning, module="jose")
+    warnings.filterwarnings("ignore", category=DeprecationWarning, module="httpx")

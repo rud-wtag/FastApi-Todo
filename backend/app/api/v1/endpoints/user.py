@@ -3,7 +3,10 @@ from fastapi.responses import JSONResponse
 
 from app.core.dependencies import admin
 from app.interface.user_interface import UserInterface
-from app.schema.auth_schema import FullUserResponse
+from app.interface.user_registration_interface import UserRegistrationInterface
+from app.schema.auth_schema import CreateUserResponse, FullUserResponse
+from app.services.auth_service import AuthInterface, AuthService
+from app.services.jwt_token_service import JWTTokenInterface, JWTTokenService
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(admin)])
