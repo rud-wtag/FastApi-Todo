@@ -4,3 +4,4 @@ profiler
 app.log
 *.db
 files
+.coverage

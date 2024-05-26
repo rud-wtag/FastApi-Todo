@@ -13,9 +13,9 @@ def test_get_all_users(client, insert_user_data):
         },
     )
 
-    cookie = {"access_token": login_response.cookies.get("access_token")}
+    client.cookies.set("access_token", login_response.cookies.get("access_token"))
 
-    response = client.get("/api/v1/users", cookies=cookie)
+    response = client.get("/api/v1/users")
     assert response.status_code == 200
     response_data = response.json()
     assert isinstance(response_data, list)
@@ -32,9 +32,9 @@ def test_get_user(client, insert_user_data):
         },
     )
 
-    cookie = {"access_token": login_response.cookies.get("access_token")}
+    client.cookies.set("access_token", login_response.cookies.get("access_token"))
 
-    response = client.get("/api/v1/users/1", cookies=cookie)
+    response = client.get("/api/v1/users/1")
     assert response.status_code == 200
     response_data = response.json()
     assert len(response_data) > 0
@@ -62,10 +62,9 @@ def test_delete(client, insert_user_data):
         data={"username": USER["email"], "password": USER["password"]},
     )
 
-    cookie = {"access_token": login_response.cookies.get("access_token")}
+    client.cookies.set("access_token", login_response.cookies.get("access_token"))
 
-    response = client.delete(f"/api/v1/users/{user.json()['id']}", cookies=cookie)
-
+    response = client.delete(f"/api/v1/users/{user.json()['id']}")
     assert response.status_code == 200
 
 
@@ -78,16 +77,14 @@ def test_activate_deactivate_user(client, insert_user_data):
         data={"username": USER["email"], "password": USER["password"]},
     )
 
-    cookie = {"access_token": login_response.cookies.get("access_token")}
+    client.cookies.set("access_token", login_response.cookies.get("access_token"))
 
-    response = client.put(f"/api/v1/users/{user.json()['id']}/activate", cookies=cookie)
+    response = client.put(f"/api/v1/users/{user.json()['id']}/activate")
     assert response.status_code == 200
-    response = client.get(f"/api/v1/users/{user.json()['id']}", cookies=cookie)
+    response = client.get(f"/api/v1/users/{user.json()['id']}")
     assert response.json()["is_active"] is True
 
-    response = client.put(
-        f"/api/v1/users/{user.json()['id']}/deactivate", cookies=cookie
-    )
+    response = client.put(f"/api/v1/users/{user.json()['id']}/deactivate")
     assert response.status_code == 200
-    response = client.get(f"/api/v1/users/{user.json()['id']}", cookies=cookie)
+    response = client.get(f"/api/v1/users/{user.json()['id']}")
     assert response.json()["is_active"] is False
