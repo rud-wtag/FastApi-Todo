@@ -15,7 +15,7 @@ import { useSelector } from 'react-redux';
 import { useCookies } from 'react-cookie';
 import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios'
+import axios from 'axios';
 
 // ----------------------------------------------------------------------
 
@@ -57,7 +57,7 @@ export default function AccountPopover() {
       .get('/auth/logout')
       .then((res) => {
         if (res.status == 200) {
-          handleClose()
+          handleClose();
           removeCookie('profile');
           dispatch(setLoggedIn(false));
           navigate('/sign-in');

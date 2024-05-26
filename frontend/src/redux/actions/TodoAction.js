@@ -12,7 +12,7 @@ export const addTodo = (title, description, due_date, priority_level, category) 
       category,
       createdAt: new Date().toISOString()
     };
-    console.log(task)
+    console.log(task);
     axios
       .post('/tasks', task)
       .then((res) => {

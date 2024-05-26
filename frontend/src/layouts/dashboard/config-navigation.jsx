@@ -21,7 +21,7 @@ const navConfig = [
     title: 'tasks',
     path: '/',
     icon: icon('ic_blog')
-  },
+  }
   // {
   //   title: 'blog',
   //   path: '/blog',

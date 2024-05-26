@@ -13,10 +13,7 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Outlet, useRoutes } from 'react-router-dom';
 
 export const IndexPage = lazy(() => import('pages/app'));
-export const BlogPage = lazy(() => import('pages/blog'));
 export const UserPage = lazy(() => import('pages/user'));
-export const LoginPage = lazy(() => import('pages/login'));
-export const ProductsPage = lazy(() => import('pages/products'));
 export const Page404 = lazy(() => import('pages/page-not-found'));
 
 // ----------------------------------------------------------------------
@@ -47,24 +44,6 @@ export default function Router() {
             <AdminRoute>
               {' '}
               <UserPage />{' '}
-            </AdminRoute>
-          )
-        },
-        {
-          path: 'products',
-          element: (
-            <AdminRoute>
-              {' '}
-              <ProductsPage />
-            </AdminRoute>
-          )
-        },
-        {
-          path: 'blog',
-          element: (
-            <AdminRoute>
-              {' '}
-              <BlogPage />
             </AdminRoute>
           )
         }

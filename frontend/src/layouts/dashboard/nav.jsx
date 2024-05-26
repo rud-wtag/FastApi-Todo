@@ -52,7 +52,10 @@ export default function Nav({ openNav, onCloseNav }) {
         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12)
       }}
     >
-      <Avatar src={profile.avatar ? profile.avatar : 'https://i.pravatar.cc/300?img=11'} alt="photoURL" />
+      <Avatar
+        src={profile.avatar ? profile.avatar : 'https://i.pravatar.cc/300?img=11'}
+        alt="photoURL"
+      />
 
       <Box sx={{ ml: 2 }}>
         <Typography variant="subtitle2">{profile?.full_name}</Typography>

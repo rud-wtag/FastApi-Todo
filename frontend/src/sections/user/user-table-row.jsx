@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 
 import Iconify from 'components/iconify';
 import Label from 'components/label';
-import axios from 'axios'
+import axios from 'axios';
 import { toast } from 'react-toastify';
 // ----------------------------------------------------------------------
 
@@ -40,46 +40,49 @@ export default function UserTableRow({
   };
 
   const onActivate = () => {
-    axios.put(`/users/${userId}/activate`)
-    .then(res => {
-      if (res.status == 200){
-        toast.success('🦄 User activated');
-        setAction(`user ${userId} activated`)
-        handleCloseMenu()
-      }
-    })
-    .catch(err=>{
-      toast.error('🦄 User can not activated');
-    })
-  }
+    axios
+      .put(`/users/${userId}/activate`)
+      .then((res) => {
+        if (res.status == 200) {
+          toast.success('🦄 User activated');
+          setAction(`user ${userId} activated`);
+          handleCloseMenu();
+        }
+      })
+      .catch((err) => {
+        toast.error('🦄 User can not activated');
+      });
+  };
   const onDeactivate = () => {
-    axios.put(`/users/${userId}/deactivate`)
-    .then(res => {
-      console.log(res)
-      if (res.status == 200){
-        toast.success('User deactivated');
-        setAction(`user ${userId} deactivated`)
-        handleCloseMenu()
-      }
-    })
-    .catch(err=>{
-      toast.error('User can not be deactivated');
-    })
-  }
+    axios
+      .put(`/users/${userId}/deactivate`)
+      .then((res) => {
+        console.log(res);
+        if (res.status == 200) {
+          toast.success('User deactivated');
+          setAction(`user ${userId} deactivated`);
+          handleCloseMenu();
+        }
+      })
+      .catch((err) => {
+        toast.error('User can not be deactivated');
+      });
+  };
   const onDelete = () => {
-    axios.delete(`/users/${userId}`)
-    .then(res => {
-      console.log(res)
-      if (res.status == 200){
-        toast.success('User deleted');
-        setAction(`user ${userId} deleted`)
-        handleCloseMenu()
-      }
-    })
-    .catch(err=>{
-      toast.error('User can not be deleted');
-    })
-  }
+    axios
+      .delete(`/users/${userId}`)
+      .then((res) => {
+        console.log(res);
+        if (res.status == 200) {
+          toast.success('User deleted');
+          setAction(`user ${userId} deleted`);
+          handleCloseMenu();
+        }
+      })
+      .catch((err) => {
+        toast.error('User can not be deleted');
+      });
+  };
 
   return (
     <>
@@ -99,7 +102,7 @@ export default function UserTableRow({
 
         <TableCell>{email}</TableCell>
 
-        <TableCell>{role == 1? 'Admin': 'User'}</TableCell>
+        <TableCell>{role == 1 ? 'Admin' : 'User'}</TableCell>
 
         <TableCell align="center">{isVerified ? 'Yes' : 'No'}</TableCell>
 
@@ -126,20 +129,18 @@ export default function UserTableRow({
           sx: { width: 140 }
         }}
       >
-        {
-          !status && 
-          (<MenuItem onClick={onActivate}>
+        {!status && (
+          <MenuItem onClick={onActivate}>
             <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
             Activate
-          </MenuItem>)
-        }
-        {
-          status &&
+          </MenuItem>
+        )}
+        {status && (
           <MenuItem onClick={onDeactivate}>
             <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
             Deactivate
           </MenuItem>
-        }
+        )}
 
         <MenuItem onClick={onDelete} sx={{ color: 'error.main' }}>
           <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />

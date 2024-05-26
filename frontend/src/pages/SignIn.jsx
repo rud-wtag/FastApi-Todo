@@ -33,10 +33,8 @@ export default function SignIn() {
           console.log(response);
           setCookie('profile', response.data.user);
           dispatch(setLoggedIn(true));
-          if(response.data.user.role == 'admin')
-            navigate('/dashboard');
-          else
-            navigate('/');
+          if (response.data.user.role == 'admin') navigate('/dashboard');
+          else navigate('/');
         }
       })
       .catch((error) => {

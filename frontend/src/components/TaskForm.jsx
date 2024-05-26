@@ -42,7 +42,13 @@ function TaskForm({ isEditMode = false, task, submitTask }) {
       return;
     }
     setError(null);
-    submitTask(validateTitle.text, validateDetails.text, dueDate ? dayjs().toISOString(): dueDate, priorityLevel, category);
+    submitTask(
+      validateTitle.text,
+      validateDetails.text,
+      dueDate ? dayjs().toISOString() : dueDate,
+      priorityLevel,
+      category
+    );
     dispatch(setIsNewTaskRequested(false));
     setTaskTitle('');
   }

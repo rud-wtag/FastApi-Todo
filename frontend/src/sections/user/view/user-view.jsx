@@ -39,7 +39,7 @@ export default function UserPage() {
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const [action, setAction] = useState('fetch')
+  const [action, setAction] = useState('fetch');
 
   useEffect(() => {
     axios
@@ -149,7 +149,7 @@ export default function UserPage() {
                   .map((row) => (
                     <UserTableRow
                       key={row.id}
-                      userId = { row.id }
+                      userId={row.id}
                       full_name={row.full_name}
                       role={row.role_id}
                       status={row.is_active}
@@ -158,7 +158,7 @@ export default function UserPage() {
                       isVerified={row.is_email_verified}
                       selected={selected.indexOf(row.full_name) !== -1}
                       handleClick={(event) => handleClick(event, row.full_name)}
-                      setAction = {setAction}
+                      setAction={setAction}
                     />
                   ))}
 
