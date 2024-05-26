@@ -1,6 +1,7 @@
+from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
@@ -91,7 +92,7 @@ def fake_tasks(db: Session = Depends(get_db)):
     return {"msg": "task created"}
 
 
-@router.on_event("startup")
-def hey():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     task_service = TaskService()
-    task_service.send_mail_to_user_on_due_task()
+    yield task_service.send_mail_to_user_on_due_task()

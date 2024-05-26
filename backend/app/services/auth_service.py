@@ -36,7 +36,7 @@ class AuthService(AuthInterface):
         self.db.add(role)
         self.db.commit()
 
-    def registration(self, create_user_request: CreateUserRequest):
+    def registration(self, create_user_request: CreateUserRequest) -> User:
         try:
             role = self.db.query(Role).filter(Role.name == USER).first()
             user = User(
@@ -78,7 +78,7 @@ class AuthService(AuthInterface):
         self.db.refresh(user)
         return user
 
-    def login(self, email: str, password: str):
+    def login(self, email: str, password: str) -> dict:
         user = self.db.query(User).filter(User.email == email).first()
 
         if not user:
@@ -109,7 +109,7 @@ class AuthService(AuthInterface):
             },
         }
 
-    def logout(self, user: dict, access_token: str, refresh_token: str):
+    def logout(self, user_id, access_token: str, refresh_token: str):
         response = JSONResponse({"msg": "Logged out!"})
         response.delete_cookie(
             key="access_token", samesite="none", secure=True, httponly=True
@@ -117,8 +117,8 @@ class AuthService(AuthInterface):
         response.delete_cookie(
             key="refresh_token", samesite="none", secure=True, httponly=True
         )
-        self.jwt_token_service.blacklist_token(user["id"], access_token)
-        self.jwt_token_service.blacklist_token(user["id"], refresh_token)
+        self.jwt_token_service.blacklist_token(user_id, access_token)
+        self.jwt_token_service.blacklist_token(user_id, refresh_token)
         return response
 
 

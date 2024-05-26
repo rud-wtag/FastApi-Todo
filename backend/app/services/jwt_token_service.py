@@ -114,6 +114,8 @@ class JWTTokenService(JWTTokenInterface):
             "avatar": image_service.get_file(user.avatar),
             "full_name": user.full_name,
             "role": user.role.name,
+            "is_email_verified": user.is_email_verified,
+            "is_active": user.is_active,
             "token_type": token_type,
         }
 
