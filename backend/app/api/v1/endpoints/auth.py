@@ -33,7 +33,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 @router.post(
     "/register", response_model=CreateUserResponse, status_code=status.HTTP_200_OK
 )
-async def register(
+def register(
     full_name: str = Form(...),
     email: str = Form(...),
     password: str = Form(..., min_length=6),
@@ -58,7 +58,7 @@ async def register(
 
 
 @router.post("/login")
-async def login_for_access_token(
+def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     auth_service: AuthInterface = Depends(AuthService),
 ):
@@ -82,7 +82,7 @@ async def login_for_access_token(
 
 
 @router.get("/profile")
-async def profile(
+def profile(
     user: AuthInterface = Depends(get_current_user),
 ):
     user.pop("token_type")
@@ -91,7 +91,7 @@ async def profile(
 
 
 @router.post("/update-profile", response_model=CreateUserResponse)
-async def update_profile(
+def update_profile(
     profile_update_request: ProfileUpdateRequest,
     user: AuthInterface = Depends(get_current_user),
     auth_service: AuthInterface = Depends(AuthService),
@@ -101,7 +101,7 @@ async def update_profile(
 
 
 @router.get("/send-verification-email")
-async def send_verify_email(
+def send_verify_email(
     user: AuthInterface = Depends(get_current_user),
     user_registration_service: UserRegistrationInterface = Depends(
         UserRegistrationService
@@ -112,7 +112,7 @@ async def send_verify_email(
 
 
 @router.get("/verify-email")
-async def verify_email(
+def verify_email(
     token: str,
     request: Request,
     user_registration_service: UserRegistrationInterface = Depends(
@@ -124,7 +124,7 @@ async def verify_email(
 
 
 @router.post("/refresh_token")
-async def refresh_token(
+def refresh_token(
     jwt_token_service: JWTTokenInterface = Depends(JWTTokenService),
     refresh_token: str = Cookie(None),
 ):
@@ -137,7 +137,7 @@ async def refresh_token(
 
 
 @router.post("/send-password-reset-link")
-async def password_reset_link(
+def password_reset_link(
     email: Annotated[str, Form()],
     user_registration_service: UserRegistrationInterface = Depends(
         UserRegistrationService
@@ -149,7 +149,7 @@ async def password_reset_link(
 
 
 @router.post("/reset-password")
-async def password_reset(
+def password_reset(
     token: str,
     new_password: Annotated[str, Form()],
     user_registration_service: UserRegistrationInterface = Depends(
@@ -168,7 +168,7 @@ async def password_reset(
 
 
 @router.post("/change-password")
-async def change_password(
+def change_password(
     old_password: Annotated[str, Form()],
     new_password: Annotated[str, Form()],
     user: dict = Depends(get_current_user),
@@ -188,7 +188,7 @@ async def change_password(
 
 
 @router.get("/logout")
-async def logout(
+def logout(
     user: dict = Depends(get_current_user),
     access_token=Cookie(None),
     refresh_token=Cookie(None),

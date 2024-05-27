@@ -21,14 +21,14 @@ async def get_all_user(
 @router.get("/{user_id}", response_model=FullUserResponse)
 async def get_user(
     user_id,
-    user_service: UserService = Depends(UserService),
+    user_service: UserInterface = Depends(UserService),
 ):
     user = user_service.get_user(user_id)
     return user
 
 
 @router.put("/{user_id}/activate")
-def activate_user(user_id: int, user_service: UserService = Depends(UserService)):
+def activate_user(user_id: int, user_service: UserInterface = Depends(UserService)):
     if user_service.activate_user(user_id):
         return {"message": "User activated successfully"}
     else:
@@ -38,7 +38,7 @@ def activate_user(user_id: int, user_service: UserService = Depends(UserService)
 
 
 @router.put("/{user_id}/deactivate")
-def deactivate_user(user_id: int, user_service: UserService = Depends(UserService)):
+def deactivate_user(user_id: int, user_service: UserInterface = Depends(UserService)):
     if user_service.deactivate_user(user_id):
         return {"message": "User deactivated successfully"}
     else:
@@ -51,7 +51,7 @@ def deactivate_user(user_id: int, user_service: UserService = Depends(UserServic
 async def delete_user(
     user_id,
     current_user: User = Depends(get_current_user),
-    user_service: UserService = Depends(UserService),
+    user_service: UserInterface = Depends(UserService),
 ):
     user = user_service.delete_user(user_id, current_user)
     response = JSONResponse(user)
