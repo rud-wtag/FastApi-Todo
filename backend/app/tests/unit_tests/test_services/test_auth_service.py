@@ -1,7 +1,5 @@
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from app.core.constants import ACCESS_TOKEN, ADMIN, REFRESH_TOKEN
 from app.models.user import User
 from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest

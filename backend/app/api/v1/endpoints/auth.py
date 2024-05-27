@@ -176,9 +176,7 @@ async def change_password(
         UserRegistrationService
     ),
 ):
-    user_registration_service.change_password(
-        new_password, old_password, user
-    )
+    user_registration_service.change_password(new_password, old_password, user)
     response = JSONResponse({"msg": "Password reset successful"})
     response.delete_cookie(
         key="access_token", samesite="none", secure=True, httponly=True

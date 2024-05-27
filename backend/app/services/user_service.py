@@ -35,12 +35,12 @@ class UserService(UserInterface):
             return False
 
     def delete_user(self, user_id: int, current_user: dict):
-        if int(user_id) == current_user['id']:
+        if int(user_id) == current_user["id"]:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="You can not delete yourself",
             )
-        
+
         user = self.get_user(user_id)
 
         if not user:
