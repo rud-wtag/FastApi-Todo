@@ -172,39 +172,6 @@ class TestUserRegistrationService:
             "id": self.user["id"],
             "token_type": RESET_PASSWORD_TOKEN,
         }
-        request = MagicMock(spec=Request)
-
-        reponse = user_registration_service.reset_password(self.token, "new_password")
-
-        mock_db_session.query.assert_called_with(mock_user_class)
-        mock_get_hashed_password.assert_called_with("new_password")
-        mock_db_session.commit.assert_called_once
-        mock_db_session.refresh.assert_called_once
-        mock_jwt_token_service.blacklist_token.assert_called_with(
-            self.user["id"], self.token
-        )
-
-    @patch("app.services.user_registration_service.User")
-    @patch("app.services.user_registration_service.get_hashed_password")
-    def test_reset_password(
-        self,
-        mock_get_hashed_password,
-        mock_user_class,
-        mock_db_session,
-    ):
-        mock_jwt_token_service = MagicMock(JWTTokenService)
-        user_registration_service = UserRegistrationService(
-            db=mock_db_session,
-            jwt_token_service=mock_jwt_token_service,
-            background_tasks=self.background_task,
-        )
-        mock_user = User(**self.user)
-        mock_user_class.return_value = mock_user
-        mock_db_session.query().filter().first.return_value = mock_user
-        mock_jwt_token_service.verify_token.return_value = {
-            "id": self.user["id"],
-            "token_type": RESET_PASSWORD_TOKEN,
-        }
 
         response = user_registration_service.reset_password(self.token, "new_password")
 
@@ -215,7 +182,7 @@ class TestUserRegistrationService:
         mock_jwt_token_service.blacklist_token.assert_called_with(
             self.user["id"], self.token
         )
-        assert response == True
+        assert response == {"message": "Password reset successful"}
 
     @patch("app.services.user_registration_service.User")
     @patch("app.services.user_registration_service.get_hashed_password")

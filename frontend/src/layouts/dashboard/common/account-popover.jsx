@@ -56,7 +56,7 @@ export default function AccountPopover() {
     axios
       .get('/auth/logout')
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status == 204) {
           handleClose();
           removeCookie('profile');
           dispatch(setLoggedIn(false));

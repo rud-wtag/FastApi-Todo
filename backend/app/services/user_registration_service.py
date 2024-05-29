@@ -50,6 +50,7 @@ class UserRegistrationService(UserRegistrationInterface):
             template_body={"url": url, "email": email},
             template_name="email-verification.html",
         )
+        return {"message": "A verification mail sent to your email"}
 
     def verify_email(self, token: str, request: Request):
         user = self.jwt_token_service.verify_token(token)
@@ -97,7 +98,7 @@ class UserRegistrationService(UserRegistrationInterface):
             template_name="forget-password.html",
         )
 
-        return True
+        return {"message": "Password reset mail sent to your email"}
 
     def reset_password(self, token: str, new_password: str):
         user = self.jwt_token_service.verify_token(token)
@@ -113,9 +114,9 @@ class UserRegistrationService(UserRegistrationInterface):
                 self.db.commit()
                 self.db.refresh(user_model)
                 self.jwt_token_service.blacklist_token(user["id"], token)
-                return True
+                return {"message": "Password reset successful"}
 
-        return False
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Password reset failed")
 
     def change_password(self, new_password: str, old_password: str, user: dict):
         user_model = self.db.query(User).filter(User.id == user["id"]).first()

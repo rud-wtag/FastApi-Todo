@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, patch
 
+from fastapi import status
+
 from app.core.constants import ACCESS_TOKEN, ADMIN, REFRESH_TOKEN
 from app.models.user import User
 from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest
@@ -76,7 +78,7 @@ class TestAuthService:
 
     @patch("app.services.auth_service.User")
     @patch("app.services.auth_service.UserRegistrationService")
-    def test_registration(
+    def test_profile_update(
         self,
         mock_user_registration_service,
         mock_user_class,
@@ -181,7 +183,7 @@ class TestAuthService:
         mock_jwt_token_service.blacklist_token.assert_any_call(
             user["id"], REFRESH_TOKEN
         )
-        json_response_class.assert_called_with({"msg": "Logged out!"})
+        json_response_class.assert_called_with(
+            {"message": "Logged out!"}, status_code=status.HTTP_204_NO_CONTENT
+        )
         assert result is not None
-
-        # assert mock_db_session.add.call_args[0][0].__dict__ == Role(name = ADMIN).__dict__

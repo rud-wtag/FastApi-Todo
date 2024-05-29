@@ -110,7 +110,9 @@ class AuthService(AuthInterface):
         }
 
     def logout(self, user_id, access_token: str, refresh_token: str):
-        response = JSONResponse({"msg": "Logged out!"})
+        response = JSONResponse(
+            {"message": "Logged out!"}, status_code=status.HTTP_204_NO_CONTENT
+        )
         response.delete_cookie(
             key="access_token", samesite="none", secure=True, httponly=True
         )

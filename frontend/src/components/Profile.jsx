@@ -22,7 +22,7 @@ export default function Profile() {
     axios
       .get('/auth/logout')
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status == 204) {
           removeCookie('profile');
           dispatch(setLoggedIn(false));
           navigate('/sign-in');

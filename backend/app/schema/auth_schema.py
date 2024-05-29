@@ -76,3 +76,15 @@ class CreateUserResponse(BaseUser):
 class FullUserResponse(CreateUserResponse):
     is_active: bool
     is_email_verified: bool
+
+
+class LoginResponse(BaseModel):
+    msg: str
+    user: dict
+
+
+class UserProfileResponse(BaseModel):
+    id: int
+    username: str
+    full_name: str
+    role: str

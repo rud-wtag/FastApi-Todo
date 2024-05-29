@@ -20,8 +20,11 @@ from app.interface.user_registration_interface import UserRegistrationInterface
 from app.schema.auth_schema import (
     CreateUserRequest,
     CreateUserResponse,
+    LoginResponse,
     ProfileUpdateRequest,
+    UserProfileResponse,
 )
+from app.schema.response_schema import SuccessResponse
 from app.services.auth_service import AuthInterface, AuthService
 from app.services.image_service import image_service
 from app.services.jwt_token_service import JWTTokenInterface, JWTTokenService
@@ -57,7 +60,7 @@ def register(
     return user
 
 
-@router.post("/login")
+@router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
 def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     auth_service: AuthInterface = Depends(AuthService),
@@ -81,16 +84,18 @@ def login_for_access_token(
     return response
 
 
-@router.get("/profile")
+@router.get(
+    "/profile", response_model=UserProfileResponse, status_code=status.HTTP_200_OK
+)
 def profile(
-    user: AuthInterface = Depends(get_current_user),
+    user: dict = Depends(get_current_user),
 ):
-    user.pop("token_type")
-    response = JSONResponse(user)
-    return response
+    return user
 
 
-@router.post("/update-profile", response_model=CreateUserResponse)
+@router.post(
+    "/update-profile", response_model=CreateUserResponse, status_code=status.HTTP_200_OK
+)
 def update_profile(
     profile_update_request: ProfileUpdateRequest,
     user: AuthInterface = Depends(get_current_user),
@@ -100,18 +105,24 @@ def update_profile(
     return updated_user
 
 
-@router.get("/send-verification-email")
+@router.get(
+    "/send-verification-email",
+    response_model=SuccessResponse,
+    status_code=status.HTTP_200_OK,
+)
 def send_verify_email(
     user: AuthInterface = Depends(get_current_user),
     user_registration_service: UserRegistrationInterface = Depends(
         UserRegistrationService
     ),
 ):
-    user_registration_service.send_verification_mail(user["username"], user["id"])
-    return JSONResponse({"msg": "A verification mail sent to your email"})
+    response = user_registration_service.send_verification_mail(
+        user["username"], user["id"]
+    )
+    return response
 
 
-@router.get("/verify-email")
+@router.get("/verify-email", status_code=status.HTTP_200_OK)
 def verify_email(
     token: str,
     request: Request,
@@ -123,32 +134,35 @@ def verify_email(
     return template
 
 
-@router.post("/refresh_token")
+@router.post("/refresh_token", status_code=status.HTTP_200_OK)
 def refresh_token(
     jwt_token_service: JWTTokenInterface = Depends(JWTTokenService),
     refresh_token: str = Cookie(None),
 ):
     access_token = jwt_token_service.refresh_token(refresh_token)
-    response = JSONResponse({"msg": "Token refreshed successfully"})
+    response = JSONResponse({"message": "Token refreshed successfully"})
     response.set_cookie(
         key="access_token", value=access_token, httponly=True, secure=True
     )
     return response
 
 
-@router.post("/send-password-reset-link")
+@router.post(
+    "/send-password-reset-link",
+    response_model=SuccessResponse,
+    status_code=status.HTTP_200_OK,
+)
 def password_reset_link(
     email: Annotated[str, Form()],
     user_registration_service: UserRegistrationInterface = Depends(
         UserRegistrationService
     ),
 ):
-    user_registration_service.send_reset_password_link(email)
-    response = JSONResponse({"msg": "Password reset mail sent to your email"})
+    response = user_registration_service.send_reset_password_link(email)
     return response
 
 
-@router.post("/reset-password")
+@router.post("/reset-password", status_code=status.HTTP_200_OK)
 def password_reset(
     token: str,
     new_password: Annotated[str, Form()],
@@ -157,7 +171,7 @@ def password_reset(
     ),
 ):
     user_registration_service.reset_password(token, new_password)
-    response = JSONResponse({"msg": "Password reset successful"})
+    response = JSONResponse({"message": "Password reset successful"})
     response.delete_cookie(
         key="access_token", samesite="none", secure=True, httponly=True
     )
@@ -167,7 +181,7 @@ def password_reset(
     return response
 
 
-@router.post("/change-password")
+@router.post("/change-password", status_code=status.HTTP_200_OK)
 def change_password(
     old_password: Annotated[str, Form()],
     new_password: Annotated[str, Form()],
@@ -177,7 +191,7 @@ def change_password(
     ),
 ):
     user_registration_service.change_password(new_password, old_password, user)
-    response = JSONResponse({"msg": "Password reset successful"})
+    response = JSONResponse({"message": "Password reset successful"})
     response.delete_cookie(
         key="access_token", samesite="none", secure=True, httponly=True
     )
@@ -187,7 +201,7 @@ def change_password(
     return response
 
 
-@router.get("/logout")
+@router.get("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(
     user: dict = Depends(get_current_user),
     access_token=Cookie(None),

@@ -65,4 +65,4 @@ def test_logout(client, insert_user_data):
     client.cookies.set("access_token", login_response.cookies.get("access_token"))
 
     response = client.get("/api/v1/auth/logout")
-    assert response.status_code == 200
+    assert response.status_code == 204
