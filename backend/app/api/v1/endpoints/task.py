@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import APIRouter, Depends, FastAPI
+from fastapi import APIRouter, Depends, FastAPI, status
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
@@ -9,6 +9,7 @@ from app.core.dependencies import auth, get_current_user
 from app.db.database import get_db
 from app.faker.task_faker import create_dummy_tasks
 from app.models.user import User
+from app.schema.response_schema import SuccessResponse
 from app.schema.task_schema import Task, TaskCreateRequest, TaskUpdateRequest
 from app.services.task_service import TaskService
 
@@ -24,7 +25,7 @@ def create_task(
     return task_service.create_task(current_user, task_request)
 
 
-@router.get("/tasks", response_model=Page[Task])
+@router.get("/tasks", response_model=Page[Task], status_code=status.HTTP_200_OK)
 def get_all_tasks(
     task_service: TaskService = Depends(TaskService),
     search_query: Optional[str] = None,
@@ -40,7 +41,7 @@ def get_all_tasks(
     return tasks
 
 
-@router.get("/tasks/{task_id}", response_model=Task)
+@router.get("/tasks/{task_id}", response_model=Task, status_code=status.HTTP_200_OK)
 def get_task_by_id(
     task_id: int,
     current_user: User = Depends(get_current_user),
@@ -49,7 +50,7 @@ def get_task_by_id(
     return task_service.get_task_by_id(current_user, task_id)
 
 
-@router.put("/tasks/{task_id}", response_model=Task)
+@router.put("/tasks/{task_id}", response_model=Task, status_code=status.HTTP_200_OK)
 def update_task(
     task_id,
     update_task_request: TaskUpdateRequest,
@@ -59,7 +60,9 @@ def update_task(
     return task_service.update_task(current_user, task_id, update_task_request)
 
 
-@router.put("/tasks/{task_id}/complete")
+@router.put(
+    "/tasks/{task_id}/complete", response_model=Task, status_code=status.HTTP_200_OK
+)
 def mark_as_complete(
     task_id,
     current_user: User = Depends(get_current_user),
@@ -68,7 +71,9 @@ def mark_as_complete(
     return task_service.mark_as_complete(task_id, current_user)
 
 
-@router.put("/tasks/{task_id}/incomplete")
+@router.put(
+    "/tasks/{task_id}/incomplete", response_model=Task, status_code=status.HTTP_200_OK
+)
 def mark_as_incomplete(
     task_id,
     current_user: User = Depends(get_current_user),
@@ -77,7 +82,9 @@ def mark_as_incomplete(
     return task_service.mark_as_incomplete(task_id, current_user)
 
 
-@router.delete("/tasks/{task_id}")
+@router.delete(
+    "/tasks/{task_id}", response_model=SuccessResponse, status_code=status.HTTP_200_OK
+)
 def delete_task(
     task_id: int,
     current_user: User = Depends(get_current_user),
@@ -86,10 +93,12 @@ def delete_task(
     return task_service.delete_task(current_user, task_id)
 
 
-@router.get("/create-fake-tasks")
+@router.get(
+    "/create-fake-tasks", response_model=SuccessResponse, status_code=status.HTTP_200_OK
+)
 def fake_tasks(db: Session = Depends(get_db)):
     create_dummy_tasks(db)
-    return {"msg": "task created"}
+    return {"message": "task created"}
 
 
 @asynccontextmanager
