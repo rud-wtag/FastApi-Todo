@@ -64,15 +64,6 @@ class CreateUserResponse(BaseUser):
             return image_service.get_file(self.avatar)
         return None
 
-    @property
-    def test(self) -> Optional[str]:
-        if self.avatar:
-            return image_service.get_file(self.avatar)
-        return None
-
-    class config:
-        fields = {"avatar": "_test"}
-
 
 class FullUserResponse(CreateUserResponse):
     is_active: bool
