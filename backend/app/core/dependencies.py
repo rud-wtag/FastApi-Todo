@@ -1,7 +1,12 @@
 from fastapi import Cookie, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-from app.core.constants import ADMIN, USER
+from app.core.constants import (
+    ADMIN,
+    EMIL_NOT_VERIFIED_MESSAGE,
+    UNAUTHORIZE_MESSAGE,
+    USER,
+)
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.services.jwt_token_service import JWTTokenService
 
@@ -14,7 +19,7 @@ def get_current_user(
 ):
     if access_token is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate token"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=UNAUTHORIZE_MESSAGE
         )
     user = jwt_token_service.verify_token(access_token)
 
@@ -27,7 +32,7 @@ def admin(user: dict = Depends(get_current_user)):
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="You are not authorized to do this action",
+            detail=UNAUTHORIZE_MESSAGE,
         )
 
 
@@ -39,7 +44,7 @@ def auth(user: dict = Depends(get_current_user)):
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="You are not authorized to do this action",
+            detail=UNAUTHORIZE_MESSAGE,
         )
 
 
@@ -49,7 +54,7 @@ def active_user(user: dict = Depends(get_current_user)):
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="You are not an active user",
+            detail=UNAUTHORIZE_MESSAGE,
         )
 
 
@@ -59,5 +64,5 @@ def email_verified(user: dict = Depends(get_current_user)):
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Your email is not verified please verify your email first",
+            detail=EMIL_NOT_VERIFIED_MESSAGE,
         )

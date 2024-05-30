@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from starlette.background import BackgroundTasks
 
 from app.core.config import settings
-from app.core.constants import ADMIN
+from app.core.constants import ADMIN, TASK_DELETED_MESSAGE, TASK_NOT_FOUND
 from app.core.mail import mail
 from app.db.database import get_db
 from app.logger import logger
@@ -71,7 +71,7 @@ class TaskService:
         task = task.first()
         if not task:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=TASK_NOT_FOUND
             )
         return task
 
@@ -98,7 +98,7 @@ class TaskService:
         task = self.get_task_by_id(user, task_id)
         self.db.delete(task)
         self.db.commit()
-        return {"message": "Task deleted successfully"}
+        return {"message": TASK_DELETED_MESSAGE}
 
     def mark_as_complete(self, task_id: int, user: dict):
         task = self.get_task_by_id(user, task_id)
@@ -113,7 +113,7 @@ class TaskService:
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task not Found",
+            detail=TASK_NOT_FOUND,
         )
 
     def mark_as_incomplete(self, task_id: int, user: dict):
@@ -129,7 +129,7 @@ class TaskService:
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task not Found",
+            detail=TASK_NOT_FOUND,
         )
 
     # @repeat_at(cron="*/1 * * * *")

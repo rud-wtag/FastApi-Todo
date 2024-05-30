@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, FastAPI, status
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
+from app.core.constants import TASK_CREATED
 from app.core.dependencies import auth, get_current_user
 from app.db.database import get_db
 from app.faker.task_faker import create_dummy_tasks
@@ -98,7 +99,7 @@ def delete_task(
 )
 def fake_tasks(db: Session = Depends(get_db)):
     create_dummy_tasks(db)
-    return {"message": "task created"}
+    return {"message": TASK_CREATED}
 
 
 @asynccontextmanager

@@ -9,7 +9,10 @@ from app.core.config import settings
 from app.core.constants import (
     ACCESS_TOKEN,
     ADMIN,
+    EMAIL_ALREADY_VERIFIED_MESSAGE,
     EMAIL_VERIFICATION_TOKEN,
+    EMAIL_VERIFIED_MESSAGE,
+    PASSWORD_RESET_MESSAGE,
     RESET_PASSWORD_TOKEN,
 )
 from app.models.user import User
@@ -100,7 +103,7 @@ class TestUserRegistrationService:
         mock_get_html.assert_called_once
         mock_get_html().TemplateResponse.assert_called_once_with(
             "email-verification-success.html",
-            {"request": request, "msg": "Email verified successfully"},
+            {"request": request, "msg": EMAIL_VERIFIED_MESSAGE},
         )
 
         mock_user_class.is_email_verified.return_value = True
@@ -109,7 +112,7 @@ class TestUserRegistrationService:
 
         mock_get_html().TemplateResponse.assert_called_with(
             "email-verification-success.html",
-            {"request": request, "msg": "Email already verified!"},
+            {"request": request, "msg": EMAIL_ALREADY_VERIFIED_MESSAGE},
         )
 
     @freeze_time("2024-01-1")
@@ -182,7 +185,7 @@ class TestUserRegistrationService:
         mock_jwt_token_service.blacklist_token.assert_called_with(
             self.user["id"], self.token
         )
-        assert response == {"message": "Password reset successful"}
+        assert response == {"message": PASSWORD_RESET_MESSAGE}
 
     @patch("app.services.user_registration_service.User")
     @patch("app.services.user_registration_service.get_hashed_password")

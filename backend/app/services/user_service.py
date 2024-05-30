@@ -1,6 +1,11 @@
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.constants import (
+    USER_DELETE_MESSAGE,
+    USER_NOT_FOUND_MESSAGE,
+    USER_SELF_DELETE_MESSAGE,
+)
 from app.db.database import get_db
 from app.interface.user_interface import UserInterface
 from app.models.user import User
@@ -38,7 +43,7 @@ class UserService(UserInterface):
         if int(user_id) == current_user["id"]:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="You can not delete yourself",
+                detail=USER_SELF_DELETE_MESSAGE,
             )
 
         user = self.get_user(user_id)
@@ -46,8 +51,8 @@ class UserService(UserInterface):
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User not found",
+                detail=USER_NOT_FOUND_MESSAGE,
             )
         self.db.delete(user)
         self.db.commit()
-        return {"message": "User deleted successfully"}
+        return {"message": USER_DELETE_MESSAGE}

@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 
+from app.core.constants import (
+    USER_ACTIVATED_MESSAGE,
+    USER_DEACTIVATED_MESSAGE,
+    USER_NOT_FOUND_MESSAGE,
+)
 from app.core.dependencies import admin, get_current_user
 from app.interface.user_interface import UserInterface
 from app.models.user import User
@@ -37,10 +42,10 @@ async def get_user(
 )
 def activate_user(user_id: int, user_service: UserInterface = Depends(UserService)):
     if user_service.activate_user(user_id):
-        return {"message": "User activated successfully"}
+        return {"message": USER_ACTIVATED_MESSAGE}
     else:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=USER_NOT_FOUND_MESSAGE
         )
 
 
@@ -51,10 +56,10 @@ def activate_user(user_id: int, user_service: UserInterface = Depends(UserServic
 )
 def deactivate_user(user_id: int, user_service: UserInterface = Depends(UserService)):
     if user_service.deactivate_user(user_id):
-        return {"message": "User deactivated successfully"}
+        return {"message": USER_DEACTIVATED_MESSAGE}
     else:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=USER_NOT_FOUND_MESSAGE
         )
 
 

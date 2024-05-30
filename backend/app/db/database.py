@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
+from app.core.constants import SERVER_ERROR_MESSAGE
 from app.core.context_manager import context_set_db_session_rollback
 from app.logger import logger
 
@@ -29,7 +30,7 @@ def get_db():
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error occurred",
+            detail=SERVER_ERROR_MESSAGE,
         )
     finally:
         db.close()

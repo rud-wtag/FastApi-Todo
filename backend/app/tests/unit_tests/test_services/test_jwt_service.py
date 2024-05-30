@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from jose import jwt
 
 from app.core.config import settings
+from app.core.constants import UNAUTHORIZE_MESSAGE
 from app.models.token import Token
 from app.models.user import User
 from app.services.jwt_token_service import JWTTokenService
@@ -196,4 +197,4 @@ class TestJwtTokenService:
                 token_service.create_token.return_value = "test_token"
                 token_service.refresh_token("test_token")
         assert exc_info.value.status_code == 401
-        assert exc_info.value.detail == "Could not validate the user"
+        assert exc_info.value.detail == UNAUTHORIZE_MESSAGE

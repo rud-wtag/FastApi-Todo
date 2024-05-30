@@ -11,6 +11,7 @@ from pydantic import (
     field_validator,
 )
 
+from app.core.constants import EMAIL_INVALID_MESSAGE
 from app.schema.base_schema import ModelBaseInfo
 from app.services.image_service import image_service
 
@@ -39,7 +40,7 @@ class CreateUserRequest(BaseUser):
         except ValidationError:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Invalid email",
+                detail=EMAIL_INVALID_MESSAGE,
             )
         return value
 

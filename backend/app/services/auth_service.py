@@ -5,7 +5,15 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.constants import GUEST, REFRESH_TOKEN, USER
+from app.core.constants import (
+    EMAIL_ALREADY_EXIST,
+    FAILED_TO_REGISTER,
+    GUEST,
+    INVALID_CREDENTIAL,
+    LOGGED_OUT_MESSAGE,
+    REFRESH_TOKEN,
+    USER,
+)
 from app.db.database import get_db
 from app.interface.auth_interface import AuthInterface
 from app.interface.jwt_token_interface import JWTTokenInterface
@@ -51,12 +59,12 @@ class AuthService(AuthInterface):
             if "unique constraint" in str(e):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Email already exists",
+                    detail=EMAIL_ALREADY_EXIST,
                 )
             else:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Failed to register user",
+                    detail=FAILED_TO_REGISTER,
                 )
         return user
 
@@ -84,12 +92,12 @@ class AuthService(AuthInterface):
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
+                detail=INVALID_CREDENTIAL,
             )
         if not verify_password(password, user.password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
+                detail=INVALID_CREDENTIAL,
             )
         access_token = self.jwt_token_service.create_token(
             user.email, user.id, timedelta(days=1)
@@ -111,7 +119,7 @@ class AuthService(AuthInterface):
 
     def logout(self, user_id, access_token: str, refresh_token: str):
         response = JSONResponse(
-            {"message": "Logged out!"}, status_code=status.HTTP_204_NO_CONTENT
+            {"message": LOGGED_OUT_MESSAGE}, status_code=status.HTTP_204_NO_CONTENT
         )
         response.delete_cookie(
             key="access_token", samesite="none", secure=True, httponly=True

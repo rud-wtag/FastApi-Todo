@@ -6,7 +6,12 @@ from jose.exceptions import ExpiredSignatureError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.constants import ACCESS_TOKEN, USER
+from app.core.constants import (
+    ACCESS_TOKEN,
+    UNAUTHORIZE_MESSAGE,
+    USER,
+    USER_NOT_FOUND_MESSAGE,
+)
 from app.db.database import get_db
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.models.token import Token
@@ -73,25 +78,25 @@ class JWTTokenService(JWTTokenInterface):
         except ExpiredSignatureError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token has expired",
+                detail=UNAUTHORIZE_MESSAGE,
             )
 
         except JWTError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate user",
+                detail=UNAUTHORIZE_MESSAGE,
             )
 
         if not username or not user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate the user",
+                detail=UNAUTHORIZE_MESSAGE,
             )
 
         if self.is_blacklist_token(user_id, token):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token blacklisted",
+                detail=UNAUTHORIZE_MESSAGE,
             )
 
         user = (
@@ -105,7 +110,7 @@ class JWTTokenService(JWTTokenInterface):
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="No user found",
+                detail=USER_NOT_FOUND_MESSAGE,
             )
 
         return {
@@ -125,7 +130,7 @@ class JWTTokenService(JWTTokenInterface):
         if token_details is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate the user",
+                detail=UNAUTHORIZE_MESSAGE,
             )
         access_token = self.create_token(
             token_details["username"], token_details["id"], timedelta(minutes=20)

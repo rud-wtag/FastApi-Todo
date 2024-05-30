@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 from fastapi import status
 
-from app.core.constants import ACCESS_TOKEN, ADMIN, REFRESH_TOKEN
+from app.core.constants import ACCESS_TOKEN, ADMIN, LOGGED_OUT_MESSAGE, REFRESH_TOKEN
 from app.models.user import User
 from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest
 from app.services.auth_service import AuthService
@@ -184,6 +184,6 @@ class TestAuthService:
             user["id"], REFRESH_TOKEN
         )
         json_response_class.assert_called_with(
-            {"message": "Logged out!"}, status_code=status.HTTP_204_NO_CONTENT
+            {"message": LOGGED_OUT_MESSAGE}, status_code=status.HTTP_204_NO_CONTENT
         )
         assert result is not None

@@ -15,6 +15,12 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import ValidationError
 
+from app.core.constants import (
+    EMAIL_INVALID_MESSAGE,
+    LOGGED_IN_MESSAGE,
+    PASSWORD_RESET_MESSAGE,
+    TOKEN_REFRESH_MESSAGE,
+)
 from app.core.dependencies import get_current_user
 from app.interface.user_registration_interface import UserRegistrationInterface
 from app.schema.auth_schema import (
@@ -53,7 +59,7 @@ def register(
     except ValidationError:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Email it not valid",
+            detail=EMAIL_INVALID_MESSAGE,
         )
     user = auth_service.registration(create_user_request=create_user_request)
 
@@ -66,7 +72,7 @@ def login_for_access_token(
     auth_service: AuthInterface = Depends(AuthService),
 ):
     tokens = auth_service.login(form_data.username, form_data.password)
-    response = JSONResponse({"msg": "Logged in successfully", "user": tokens["user"]})
+    response = JSONResponse({"msg": LOGGED_IN_MESSAGE, "user": tokens["user"]})
     response.set_cookie(
         key="access_token",
         value=tokens["access_token"],
@@ -140,7 +146,7 @@ def refresh_token(
     refresh_token: str = Cookie(None),
 ):
     access_token = jwt_token_service.refresh_token(refresh_token)
-    response = JSONResponse({"message": "Token refreshed successfully"})
+    response = JSONResponse({"message": TOKEN_REFRESH_MESSAGE})
     response.set_cookie(
         key="access_token", value=access_token, httponly=True, secure=True
     )
@@ -171,7 +177,7 @@ def password_reset(
     ),
 ):
     user_registration_service.reset_password(token, new_password)
-    response = JSONResponse({"message": "Password reset successful"})
+    response = JSONResponse({"message": PASSWORD_RESET_MESSAGE})
     response.delete_cookie(
         key="access_token", samesite="none", secure=True, httponly=True
     )
@@ -191,7 +197,7 @@ def change_password(
     ),
 ):
     user_registration_service.change_password(new_password, old_password, user)
-    response = JSONResponse({"message": "Password reset successful"})
+    response = JSONResponse({"message": PASSWORD_RESET_MESSAGE})
     response.delete_cookie(
         key="access_token", samesite="none", secure=True, httponly=True
     )
