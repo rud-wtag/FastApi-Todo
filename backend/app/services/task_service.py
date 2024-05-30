@@ -4,7 +4,7 @@ import pytz
 from fastapi import Depends, HTTPException, status
 from fastapi_pagination import paginate
 from fastapi_utilities import repeat_at
-from sqlalchemy import create_engine
+from sqlalchemy import and_, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from starlette.background import BackgroundTasks
 
@@ -38,21 +38,27 @@ class TaskService:
     def get_all_tasks(
         self, search_query, category, priority_level, due_date, status, user: dict
     ):
-        tasks = self.db.query(Task)
-        if user["role"] != ADMIN:
-            tasks = tasks.filter(Task.user_id == user["id"])
-        if search_query:
-            tasks = tasks.filter(Task.title.ilike(f"%{search_query}%"))
-        if category:
-            tasks = tasks.filter(Task.category == category)
-        if priority_level:
-            tasks = tasks.filter(Task.priority_level == priority_level)
-        if due_date:
-            tasks = tasks.filter(Task.due_date == datetime.fromisoformat(due_date))
-        if status:
-            tasks = tasks.filter(Task.status == status)
-        if status is False:
-            tasks = tasks.filter(Task.status == False)
+        filters = []
+
+        if user and user["role"] != ADMIN:
+            filters.append(Task.user_id == user["id"])
+
+        optional_filters = {
+            Task.title.ilike(f"%{search_query}%"): search_query,
+            Task.category == category: category,
+            Task.priority_level == priority_level: priority_level,
+            Task.due_date == datetime.fromisoformat(due_date)
+            if due_date
+            else None: due_date,
+            Task.status == status: status is not None,
+        }
+
+        for condition, value in optional_filters.items():
+            if value:
+                filters.append(condition)
+
+        tasks = self.db.query(Task).filter(and_(*filters))
+
         return paginate(tasks.order_by(Task.created_at.desc()).all())
 
     def get_all_tasks_by_user(self, user: dict):
