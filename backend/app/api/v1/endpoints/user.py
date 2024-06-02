@@ -66,7 +66,7 @@ def deactivate_user(user_id: int, user_service: UserInterface = Depends(UserServ
 @router.delete(
     "/{user_id}", response_model=SuccessResponse, status_code=status.HTTP_200_OK
 )
-async def delete_user(
+def delete_user(
     user_id,
     current_user: User = Depends(get_current_user),
     user_service: UserInterface = Depends(UserService),

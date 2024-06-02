@@ -12,43 +12,36 @@ from app.core.constants import (
     USER,
     USER_NOT_FOUND_MESSAGE,
 )
+from app.db.crud import CRUDBase
 from app.db.database import get_db
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.models.token import Token
 from app.models.user import User
+from app.schema.token_schema import TokenCreate, TokenUpdate
 from app.services.image_service import image_service
 from app.utils.helpers import decode_token
 
 
-class JWTTokenService(JWTTokenInterface):
+class JWTTokenService(JWTTokenInterface, CRUDBase):
     def __init__(self, db: Session = Depends(get_db)):
         self.db = db
+        super().__init__(model=Token)
+        self.user_crud = CRUDBase(model=User)
 
     def store_token(self, user_id: int, token: str):
-        token_model = Token(user_id=user_id, token=token)
-        self.db.add(token_model)
-        self.db.commit()
-        return token_model
+        token_create_data = TokenCreate(user_id=user_id, token=token)
+        return self.create(db=self.db, obj_in=token_create_data)
 
     def blacklist_token(self, user_id: int, token: str) -> bool:
-        token_model = (
-            self.db.query(Token)
-            .filter(Token.user_id == user_id, Token.token == token)
-            .first()
-        )
+        token_model = self.get_by_fields(self.db, {"user_id": user_id, "token": token})
         if token_model:
-            token_model.status = False
-            self.db.commit()
-            self.db.refresh(token_model)
-            return True
+            return self.update(
+                db=self.db, obj_in=TokenUpdate(status=False), id=token_model.id
+            )
         return False
 
     def is_blacklist_token(self, user_id: int, token: str) -> bool:
-        token_model = (
-            self.db.query(Token)
-            .filter(Token.user_id == user_id, Token.token == token)
-            .first()
-        )
+        token_model = self.get_by_fields(self.db, {"user_id": user_id, "token": token})
         return token_model and not token_model.status
 
     def create_token(
@@ -99,13 +92,7 @@ class JWTTokenService(JWTTokenInterface):
                 detail=UNAUTHORIZE_MESSAGE,
             )
 
-        user = (
-            self.db.query(User)
-            .filter(
-                User.id == user_id,
-            )
-            .first()
-        )
+        user = self.user_crud.get(self.db, user_id)
 
         if not user:
             raise HTTPException(

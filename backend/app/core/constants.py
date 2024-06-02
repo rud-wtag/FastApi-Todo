@@ -42,4 +42,4 @@ PASSWORD_RESET_MAIL_SENT_MESSAGE = "Password reset mail sent to your email"
 
 TASK_NOT_FOUND = "Task not Found"
 TASK_CREATED = "Task created"
-TASK_DELETED_MESSAGE = "Task created"
+TASK_DELETED_MESSAGE = "Task deleted"

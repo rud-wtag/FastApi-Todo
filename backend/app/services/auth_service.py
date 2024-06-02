@@ -14,19 +14,20 @@ from app.core.constants import (
     REFRESH_TOKEN,
     USER,
 )
+from app.db.crud import CRUDBase
 from app.db.database import get_db
 from app.interface.auth_interface import AuthInterface
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.interface.user_registration_interface import UserRegistrationInterface
 from app.models.role import Role
 from app.models.user import User
-from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest
+from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest, RoleCreate
 from app.services.jwt_token_service import JWTTokenService
 from app.services.user_registration_service import UserRegistrationService
 from app.utils.helpers import get_hashed_password, verify_password
 
 
-class AuthService(AuthInterface):
+class AuthService(AuthInterface, CRUDBase):
     def __init__(
         self,
         db: Session = Depends(get_db),
@@ -38,22 +39,20 @@ class AuthService(AuthInterface):
         self.jwt_token_service = jwt_token_service
         self.db = db
         self.user_registration_service = user_registration_service
+        self.role_crud = CRUDBase(model=Role)
+        super().__init__(model=User)
 
     def save_role(self, user_role: str = GUEST):
-        role = Role(name=user_role)
-        self.db.add(role)
-        self.db.commit()
+        self.role_crud.create(self.db, RoleCreate(user_role))
 
     def registration(self, create_user_request: CreateUserRequest) -> User:
         try:
-            role = self.db.query(Role).filter(Role.name == USER).first()
-            user = User(
-                **create_user_request.model_dump(exclude=["password", "role_id"]),
-                password=get_hashed_password(create_user_request.password),
-                role_id=role.id if role else None,
+            role = self.role_crud.get_by_field(self.db, "name", USER)
+            create_user_request.role_id = role.id if role else None
+            create_user_request.password = get_hashed_password(
+                create_user_request.password
             )
-            self.db.add(user)
-            self.db.commit()
+            user = self.create(db=self.db, obj_in=create_user_request)
             self.user_registration_service.send_verification_mail(user.email, user.id)
         except IntegrityError as e:
             if "unique constraint" in str(e):
@@ -69,25 +68,17 @@ class AuthService(AuthInterface):
         return user
 
     def profile_update(self, user_id, profile_update_request: ProfileUpdateRequest):
-        user = self.db.query(User).filter(User.id == user_id).first()
+        if profile_update_request.email:
+            profile_update_request.is_email_verified = False
+            self.user_registration_service.send_verification_mail(
+                profile_update_request.email, user_id
+            )
 
-        if profile_update_request.username:
-            user.email = profile_update_request.username
-            user.is_email_verified = False
-            self.user_registration_service.send_verification_mail(user.email, user.id)
-
-        user.full_name = (
-            profile_update_request.full_name
-            if profile_update_request.full_name
-            else user.full_name
-        )
-
-        self.db.commit()
-        self.db.refresh(user)
-        return user
+        return self.update(db=self.db, obj_in=profile_update_request, id=user_id)
 
     def login(self, email: str, password: str) -> dict:
-        user = self.db.query(User).filter(User.email == email).first()
+        user = self.get_by_field(self.db, "email", email)
+        print(password, user.password)
 
         if not user:
             raise HTTPException(
@@ -95,6 +86,7 @@ class AuthService(AuthInterface):
                 detail=INVALID_CREDENTIAL,
             )
         if not verify_password(password, user.password):
+            print("test")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=INVALID_CREDENTIAL,

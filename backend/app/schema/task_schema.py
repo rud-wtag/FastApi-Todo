@@ -57,8 +57,9 @@ class TaskCreateRequest(BaseModel):
             )
         return v
 
-    model_config = {
-        "json_schema_extra": {
+    class Config:
+        extra = "allow"
+        json_schema_extra = {
             "example": {
                 "title": "Demo task title",
                 "category": "Work",
@@ -66,7 +67,6 @@ class TaskCreateRequest(BaseModel):
                 "due_date": (datetime.now() + timedelta(days=1)).isoformat(),
             }
         }
-    }
 
 
 class TaskUpdateRequest(BaseModel):

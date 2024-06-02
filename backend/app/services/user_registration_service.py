@@ -20,6 +20,7 @@ from app.core.constants import (
     USER_NOT_FOUND_MESSAGE,
 )
 from app.core.mail import mail
+from app.db.crud import CRUDBase
 from app.db.database import get_db
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.interface.user_registration_interface import UserRegistrationInterface
@@ -28,7 +29,7 @@ from app.services.jwt_token_service import JWTTokenService
 from app.utils.helpers import get_hashed_password, get_html, verify_password
 
 
-class UserRegistrationService(UserRegistrationInterface):
+class UserRegistrationService(UserRegistrationInterface, CRUDBase):
     def __init__(
         self,
         db: Session = Depends(get_db),
@@ -38,9 +39,10 @@ class UserRegistrationService(UserRegistrationInterface):
         self.jwt_token_service = jwt_token_service
         self.db = db
         self.background_tasks = background_tasks
+        super().__init__(model=User)
 
     def send_verification_mail(self, email: str, id: str):
-        user = self.db.query(User).filter(User.id == id).first()
+        user = self.get(self.db, id)
 
         if user.is_email_verified:
             raise HTTPException(status.HTTP_200_OK, EMAIL_ALREADY_VERIFIED_MESSAGE)
@@ -65,7 +67,7 @@ class UserRegistrationService(UserRegistrationInterface):
         user = self.jwt_token_service.verify_token(token)
 
         if user["token_type"] == EMAIL_VERIFICATION_TOKEN and user:
-            user_model = self.db.query(User).filter(User.id == user["id"]).first()
+            user_model = self.get(user["id"])
             template = get_html()
 
             if user_model and not user_model.is_email_verified:
@@ -85,7 +87,7 @@ class UserRegistrationService(UserRegistrationInterface):
             )
 
     def send_reset_password_link(self, email: str):
-        user = self.db.query(User).filter(User.email == email).first()
+        user = self.get_by_field(self.db, "email", email)
 
         if user is None:
             raise HTTPException(status.HTTP_404_NOT_FOUND, USER_NOT_FOUND_MESSAGE)
@@ -126,7 +128,7 @@ class UserRegistrationService(UserRegistrationInterface):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, PASSWORD_RESET_FAILED_MESSAGE)
 
     def change_password(self, new_password: str, old_password: str, user: dict):
-        user_model = self.db.query(User).filter(User.id == user["id"]).first()
+        user_model = self.get(self.db, user["id"])
 
         if not verify_password(old_password, user_model.password):
             raise HTTPException(
@@ -135,9 +137,8 @@ class UserRegistrationService(UserRegistrationInterface):
             )
 
         if user["token_type"] == ACCESS_TOKEN:
-            user_model.password = get_hashed_password(new_password)
-            self.db.commit()
-            self.db.refresh(user_model)
+            update_data = {"password": get_hashed_password(new_password)}
+            self.update(db=self.db, obj_in=update_data, id=user_model.id)
             return True
 
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, details=UNAUTHORIZE_MESSAGE)

@@ -44,10 +44,19 @@ class CreateUserRequest(BaseUser):
             )
         return value
 
+    class Config:
+        extra = "allow"
+
 
 class ProfileUpdateRequest(BaseModel):
     full_name: str | None = Field(default=None)
-    username: EmailStr | None = Field(default=None)
+    email: EmailStr | None = Field(default=None)
+
+    class Config:
+        extra = "allow"
+        json_schema_extra = {
+            "example": {"full_name": "string", "username": "user@example.com"}
+        }
 
 
 class User(ModelBaseInfo, BaseUser):
@@ -89,3 +98,7 @@ class UserProfileResponse(BaseModel):
     username: str
     full_name: str
     role: str
+
+
+class RoleCreate(BaseModel):
+    name: str
