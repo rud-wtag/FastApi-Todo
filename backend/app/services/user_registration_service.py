@@ -67,7 +67,7 @@ class UserRegistrationService(UserRegistrationInterface, CRUDBase):
         user = self.jwt_token_service.verify_token(token)
 
         if user["token_type"] == EMAIL_VERIFICATION_TOKEN and user:
-            user_model = self.get(user["id"])
+            user_model = self.get(self.db, user["id"])
             template = get_html()
 
             if user_model and not user_model.is_email_verified:

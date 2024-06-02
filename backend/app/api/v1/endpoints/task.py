@@ -9,7 +9,6 @@ from app.core.constants import TASK_CREATED
 from app.core.dependencies import auth, get_current_user
 from app.db.database import get_db
 from app.faker.task_faker import create_dummy_tasks
-from app.models.user import User
 from app.schema.response_schema import SuccessResponse
 from app.schema.task_schema import Task, TaskCreateRequest, TaskUpdateRequest
 from app.services.task_service import TaskService
@@ -20,7 +19,7 @@ router = APIRouter(prefix="", tags=["Tasks"], dependencies=[Depends(auth)])
 @router.post("/tasks", response_model=Task, status_code=status.HTTP_200_OK)
 def create_task(
     task_request: TaskCreateRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
 ) -> Task:
     return task_service.create_task(current_user, task_request)
@@ -34,7 +33,7 @@ def get_all_tasks(
     priority_level: Optional[str] = None,
     due_date: Optional[str] = None,
     status: Optional[bool] = None,
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ) -> Page[Task]:
     tasks = task_service.get_all_tasks(
         search_query, category, priority_level, due_date, status, current_user
@@ -45,7 +44,7 @@ def get_all_tasks(
 @router.get("/tasks/{task_id}", response_model=Task, status_code=status.HTTP_200_OK)
 def get_task_by_id(
     task_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
 ) -> Task:
     return task_service.get_task_by_id(current_user, task_id)
@@ -55,7 +54,7 @@ def get_task_by_id(
 def update_task(
     task_id: int,
     update_task_request: TaskUpdateRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
 ) -> Task:
     return task_service.update_task(current_user, task_id, update_task_request)
@@ -66,7 +65,7 @@ def update_task(
 )
 def mark_as_complete(
     task_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
 ) -> Task:
     return task_service.mark_as_complete(task_id, current_user)
@@ -77,7 +76,7 @@ def mark_as_complete(
 )
 def mark_as_incomplete(
     task_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
 ) -> Task:
     return task_service.mark_as_incomplete(task_id, current_user)
@@ -88,7 +87,7 @@ def mark_as_incomplete(
 )
 def delete_task(
     task_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
 ) -> SuccessResponse:
     return task_service.delete_task(current_user, task_id)

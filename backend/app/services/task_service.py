@@ -79,7 +79,7 @@ class TaskService(CRUDBase):
         task = self.get_task_by_id(user, task_id)
         return self.update(db=self.db, obj_in=task_update_request, id=task.id)
 
-    def delete_task(self, user: User, task_id: int):
+    def delete_task(self, user: dict, task_id: int):
         task = self.get_task_by_id(user, task_id)
         self.remove(db=self.db, id=task.id)
         return {"message": TASK_DELETED_MESSAGE}

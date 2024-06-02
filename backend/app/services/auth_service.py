@@ -78,7 +78,6 @@ class AuthService(AuthInterface, CRUDBase):
 
     def login(self, email: str, password: str) -> dict:
         user = self.get_by_field(self.db, "email", email)
-        print(password, user.password)
 
         if not user:
             raise HTTPException(
@@ -86,7 +85,6 @@ class AuthService(AuthInterface, CRUDBase):
                 detail=INVALID_CREDENTIAL,
             )
         if not verify_password(password, user.password):
-            print("test")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=INVALID_CREDENTIAL,
