@@ -17,9 +17,9 @@ router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(admin)
 
 
 @router.get("", response_model=list[FullUserResponse], status_code=status.HTTP_200_OK)
-async def get_all_user(
+def get_all_users(
     user_service: UserInterface = Depends(UserService),
-):
+) -> list[FullUserResponse]:
     users = user_service.get_all_users()
     return users
 
@@ -27,11 +27,15 @@ async def get_all_user(
 @router.get(
     "/{user_id}", response_model=FullUserResponse, status_code=status.HTTP_200_OK
 )
-async def get_user(
-    user_id,
+def get_user(
+    user_id: int,
     user_service: UserInterface = Depends(UserService),
-):
+) -> FullUserResponse:
     user = user_service.get_user(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=USER_NOT_FOUND_MESSAGE
+        )
     return user
 
 
@@ -40,13 +44,16 @@ async def get_user(
     response_model=SuccessResponse,
     status_code=status.HTTP_200_OK,
 )
-def activate_user(user_id: int, user_service: UserInterface = Depends(UserService)):
-    if user_service.activate_user(user_id):
-        return {"message": USER_ACTIVATED_MESSAGE}
-    else:
+def activate_user(
+    user_id: int,
+    user_service: UserInterface = Depends(UserService),
+) -> SuccessResponse:
+    success = user_service.activate_user(user_id)
+    if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=USER_NOT_FOUND_MESSAGE
         )
+    return {"message": USER_ACTIVATED_MESSAGE}
 
 
 @router.put(
@@ -54,20 +61,23 @@ def activate_user(user_id: int, user_service: UserInterface = Depends(UserServic
     response_model=SuccessResponse,
     status_code=status.HTTP_200_OK,
 )
-def deactivate_user(user_id: int, user_service: UserInterface = Depends(UserService)):
-    if user_service.deactivate_user(user_id):
-        return {"message": USER_DEACTIVATED_MESSAGE}
-    else:
+def deactivate_user(
+    user_id: int,
+    user_service: UserInterface = Depends(UserService),
+) -> SuccessResponse:
+    success = user_service.deactivate_user(user_id)
+    if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=USER_NOT_FOUND_MESSAGE
         )
+    return {"message": USER_DEACTIVATED_MESSAGE}
 
 
 @router.delete(
     "/{user_id}", response_model=SuccessResponse, status_code=status.HTTP_200_OK
 )
 def delete_user(
-    user_id,
+    user_id: int,
     current_user: User = Depends(get_current_user),
     user_service: UserInterface = Depends(UserService),
 ):

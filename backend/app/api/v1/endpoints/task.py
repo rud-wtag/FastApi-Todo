@@ -22,7 +22,7 @@ def create_task(
     task_request: TaskCreateRequest,
     current_user: User = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
-):
+) -> Task:
     return task_service.create_task(current_user, task_request)
 
 
@@ -35,7 +35,7 @@ def get_all_tasks(
     due_date: Optional[str] = None,
     status: Optional[bool] = None,
     current_user: User = Depends(get_current_user),
-) -> any:
+) -> Page[Task]:
     tasks = task_service.get_all_tasks(
         search_query, category, priority_level, due_date, status, current_user
     )
@@ -47,17 +47,17 @@ def get_task_by_id(
     task_id: int,
     current_user: User = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
-):
+) -> Task:
     return task_service.get_task_by_id(current_user, task_id)
 
 
 @router.put("/tasks/{task_id}", response_model=Task, status_code=status.HTTP_200_OK)
 def update_task(
-    task_id,
+    task_id: int,
     update_task_request: TaskUpdateRequest,
     current_user: User = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
-):
+) -> Task:
     return task_service.update_task(current_user, task_id, update_task_request)
 
 
@@ -65,10 +65,10 @@ def update_task(
     "/tasks/{task_id}/complete", response_model=Task, status_code=status.HTTP_200_OK
 )
 def mark_as_complete(
-    task_id,
+    task_id: int,
     current_user: User = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
-):
+) -> Task:
     return task_service.mark_as_complete(task_id, current_user)
 
 
@@ -76,10 +76,10 @@ def mark_as_complete(
     "/tasks/{task_id}/incomplete", response_model=Task, status_code=status.HTTP_200_OK
 )
 def mark_as_incomplete(
-    task_id,
+    task_id: int,
     current_user: User = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
-):
+) -> Task:
     return task_service.mark_as_incomplete(task_id, current_user)
 
 
@@ -90,14 +90,14 @@ def delete_task(
     task_id: int,
     current_user: User = Depends(get_current_user),
     task_service: TaskService = Depends(TaskService),
-):
+) -> SuccessResponse:
     return task_service.delete_task(current_user, task_id)
 
 
 @router.get(
     "/create-fake-tasks", response_model=SuccessResponse, status_code=status.HTTP_200_OK
 )
-def fake_tasks(db: Session = Depends(get_db)):
+def fake_tasks(db: Session = Depends(get_db)) -> SuccessResponse:
     create_dummy_tasks(db)
     return {"message": TASK_CREATED}
 

@@ -62,7 +62,6 @@ def register(
             detail=EMAIL_INVALID_MESSAGE,
         )
     user = auth_service.registration(create_user_request=create_user_request)
-
     return user
 
 
@@ -93,9 +92,7 @@ def login_for_access_token(
 @router.get(
     "/profile", response_model=UserProfileResponse, status_code=status.HTTP_200_OK
 )
-def profile(
-    user: dict = Depends(get_current_user),
-):
+def profile(user: dict = Depends(get_current_user)):
     return user
 
 
@@ -104,7 +101,7 @@ def profile(
 )
 def update_profile(
     profile_update_request: ProfileUpdateRequest,
-    user: AuthInterface = Depends(get_current_user),
+    user: dict = Depends(get_current_user),
     auth_service: AuthInterface = Depends(AuthService),
 ):
     updated_user = auth_service.profile_update(user["id"], profile_update_request)
@@ -117,7 +114,7 @@ def update_profile(
     status_code=status.HTTP_200_OK,
 )
 def send_verify_email(
-    user: AuthInterface = Depends(get_current_user),
+    user: dict = Depends(get_current_user),
     user_registration_service: UserRegistrationInterface = Depends(
         UserRegistrationService
     ),
@@ -210,8 +207,8 @@ def change_password(
 @router.get("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(
     user: dict = Depends(get_current_user),
-    access_token=Cookie(None),
-    refresh_token=Cookie(None),
+    access_token: str = Cookie(None),
+    refresh_token: str = Cookie(None),
     auth_service: AuthInterface = Depends(AuthService),
 ):
     return auth_service.logout(user["id"], access_token, refresh_token)

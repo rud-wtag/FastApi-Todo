@@ -45,7 +45,7 @@ function TaskForm({ isEditMode = false, task, submitTask }) {
     submitTask(
       validateTitle.text,
       validateDetails.text,
-      dueDate ? dayjs().toISOString() : dueDate,
+      dueDate ? dueDate : dayjs().toISOString(),
       priorityLevel,
       category
     );
