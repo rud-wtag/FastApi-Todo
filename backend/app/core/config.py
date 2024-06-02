@@ -71,7 +71,7 @@ class CorsSettings:
         "http://localhost:3001",
     ]
     methods = ["*"]
-    headers = ["PUT", "GET", "POST", "PATCH"]
+    headers = ["POST", "GET", "PUT", "PATCH"]
 
 
 @dataclass
