@@ -18,7 +18,7 @@ class Task(ModelBaseInfo, BaseModel):
     due_date: datetime
     completed_at: Optional[datetime]
 
-    class config:
+    class Config:
         orm_mode: True
 
     @computed_field
@@ -46,16 +46,18 @@ class TaskCreateRequest(BaseModel):
 
     @field_validator("due_date")
     @classmethod
-    def validate_due_date(cls, v: datetime) -> datetime:
-        if v.tzinfo is None:
-            v = pytz.utc.localize(v)  # Convert naive datetime to aware datetime in UTC
-        if v < datetime.now(pytz.utc):
+    def validate_due_date(cls, due_time: datetime) -> datetime:
+        if due_time.tzinfo is None:
+            due_time = pytz.utc.localize(
+                due_time
+            )  # Convert naive datetime to aware datetime in UTC
+        if due_time < datetime.now(pytz.utc):
             raise PydanticCustomError(
                 "date error",
-                f"{v} is behind the current date",
-                {"date": v},
+                f"{due_time} is behind the current date",
+                {"date": due_time},
             )
-        return v
+        return due_time
 
     class Config:
         extra = "allow"
@@ -78,16 +80,18 @@ class TaskUpdateRequest(BaseModel):
 
     @field_validator("due_date")
     @classmethod
-    def validate_due_date(cls, v: datetime) -> datetime:
-        if v.tzinfo is None:
-            v = pytz.utc.localize(v)  # Convert naive datetime to aware datetime in UTC
-        if v < datetime.now(pytz.utc):
+    def validate_due_date(cls, due_time: datetime) -> datetime:
+        if due_time.tzinfo is None:
+            due_time = pytz.utc.localize(
+                due_time
+            )  # Convert naive datetime to aware datetime in UTC
+        if due_time < datetime.now(pytz.utc):
             raise PydanticCustomError(
                 "date error",
-                f"{v} is behind the current date",
-                {"date": v},
+                f"{due_time} is behind the current date",
+                {"date": due_time},
             )
-        return v
+        return due_time
 
     model_config = {
         "json_schema_extra": {

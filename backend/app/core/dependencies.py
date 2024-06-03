@@ -29,7 +29,7 @@ def get_current_user(
 
 
 def admin(user: dict = Depends(get_current_user)) -> dict:
-    if user["role"] == ADMIN:
+    if "role" in user and user["role"] == ADMIN:
         return user
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,

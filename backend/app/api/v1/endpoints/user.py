@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import JSONResponse
 
 from app.core.constants import (
     USER_ACTIVATED_MESSAGE,
@@ -81,6 +80,4 @@ def delete_user(
     current_user: User = Depends(get_current_user),
     user_service: UserInterface = Depends(UserService),
 ):
-    user = user_service.delete_user(user_id, current_user)
-    response = JSONResponse(user)
-    return response
+    return user_service.delete_user(user_id, current_user)

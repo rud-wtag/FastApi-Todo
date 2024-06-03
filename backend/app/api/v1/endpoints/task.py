@@ -16,7 +16,7 @@ from app.services.task_service import TaskService
 router = APIRouter(prefix="", tags=["Tasks"], dependencies=[Depends(auth)])
 
 
-@router.post("/tasks", response_model=Task, status_code=status.HTTP_200_OK)
+@router.post("/tasks", response_model=Task, status_code=status.HTTP_201_CREATED)
 def create_task(
     task_request: TaskCreateRequest,
     current_user: dict = Depends(get_current_user),

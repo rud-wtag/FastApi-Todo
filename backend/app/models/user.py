@@ -9,8 +9,8 @@ from app.models.role import Role
 class User(Base, BaseModel):
     __tablename__ = "users"
 
-    role_id = Column(Integer, ForeignKey(Role.id, ondelete="SET NULL"), nullable=True)
-    role = relationship(Role)
+    role_id = Column(Integer, ForeignKey(Role.id, ondelete="CASCADE"), nullable=True)
+    role = relationship(Role, foreign_keys=[role_id])
     full_name = Column(String)
     email = Column(String, unique=True)
     password = Column(String)

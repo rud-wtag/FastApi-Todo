@@ -120,7 +120,9 @@ class JWTTokenService(JWTTokenInterface, CRUDBase):
                 detail=UNAUTHORIZE_MESSAGE,
             )
         access_token = self.create_token(
-            token_details["username"], token_details["id"], timedelta(minutes=20)
+            token_details["username"],
+            token_details["id"],
+            timedelta(days=settings.app.access_token_validity),
         )
         return access_token
 

@@ -11,7 +11,7 @@ class Task(Base, BaseModel):
     __tablename__ = "tasks"
 
     user_id = Column(Integer, ForeignKey(User.id, ondelete="CASCADE"), nullable=False)
-    user = relationship(User)
+    user = relationship(User, foreign_keys=[user_id])
     title = Column(String)
     category = Column(String)
     description = Column(String)

@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.constants import (
     EMAIL_ALREADY_EXIST,
     FAILED_TO_REGISTER,
@@ -19,6 +20,7 @@ from app.db.database import get_db
 from app.interface.auth_interface import AuthInterface
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.interface.user_registration_interface import UserRegistrationInterface
+from app.logger import logger
 from app.models.role import Role
 from app.models.user import User
 from app.schema.auth_schema import CreateUserRequest, ProfileUpdateRequest, RoleCreate
@@ -56,6 +58,7 @@ class AuthService(AuthInterface, CRUDBase):
             self.user_registration_service.send_verification_mail(user.email, user.id)
         except IntegrityError as e:
             if "unique constraint" in str(e):
+                logger.error(e)
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=EMAIL_ALREADY_EXIST,
@@ -90,11 +93,14 @@ class AuthService(AuthInterface, CRUDBase):
                 detail=INVALID_CREDENTIAL,
             )
         access_token = self.jwt_token_service.create_token(
-            user.email, user.id, timedelta(days=1)
+            user.email, user.id, timedelta(days=settings.app.access_token_validity)
         )
 
         refresh_token = self.jwt_token_service.create_token(
-            user.email, user.id, timedelta(days=7), type=REFRESH_TOKEN
+            user.email,
+            user.id,
+            timedelta(days=settings.app.refresh_token_validity),
+            type=REFRESH_TOKEN,
         )
         return {
             "access_token": access_token,

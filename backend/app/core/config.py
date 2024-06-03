@@ -56,6 +56,8 @@ class AppSettings:
     project_version: str = os.getenv("PROJECT_VERSION", "1.0.0")
     secret_key: str = os.getenv("SECRET_KEY", "secret")
     algorithm: str = os.getenv("ALGORITHM")
+    access_token_validity: int = int(os.getenv("ACCESS_TOKEN_VALIDITY"))
+    refresh_token_validity: int = int(os.getenv("REFRESH_TOKEN_VALIDITY"))
     forget_password_link_expire_minutes: int = int(
         os.getenv("FORGET_PASSWORD_LINK_EXPIRE_MINUTES")
     )

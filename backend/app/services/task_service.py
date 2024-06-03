@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytz
 from fastapi import Depends, HTTPException, status
-from fastapi_pagination import paginate
+from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_utilities import repeat_at
 from sqlalchemy import and_, create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -57,7 +57,7 @@ class TaskService(CRUDBase):
 
         tasks = self.db.query(Task).filter(and_(*filters))
 
-        return paginate(tasks.order_by(Task.created_at.desc()).all())
+        return paginate(self.db, tasks.order_by(Task.created_at.desc()))
 
     def get_all_tasks_by_user(self, user: dict):
         return self.get_multi_by_field(self.db, "user_id", user[id])

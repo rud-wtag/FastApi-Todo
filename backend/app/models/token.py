@@ -9,7 +9,7 @@ from app.models.user import User
 class Token(Base, BaseModel):
     __tablename__ = "tokens"
 
-    user_id = Column(Integer, ForeignKey(User.id, ondelete="SET NULL"), nullable=True)
-    user = relationship(User)
+    user_id = Column(Integer, ForeignKey(User.id, ondelete="CASCADE"), nullable=True)
+    user = relationship(User, foreign_keys=[user_id])
     token = Column(String)
     status = Column(Boolean, default=True)
