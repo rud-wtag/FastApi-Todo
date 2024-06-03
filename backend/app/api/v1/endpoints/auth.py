@@ -14,6 +14,8 @@ from fastapi import (
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import ValidationError
+from sqlalchemy.orm import Session
+from starlette.background import BackgroundTasks
 
 from app.core.constants import (
     EMAIL_INVALID_MESSAGE,
@@ -22,7 +24,7 @@ from app.core.constants import (
     TOKEN_REFRESH_MESSAGE,
 )
 from app.core.dependencies import get_current_user
-from app.interface.user_registration_interface import UserRegistrationInterface
+from app.db.database import get_db
 from app.schema.auth_schema import (
     CreateUserRequest,
     CreateUserResponse,
@@ -31,10 +33,10 @@ from app.schema.auth_schema import (
     UserProfileResponse,
 )
 from app.schema.response_schema import SuccessResponse
-from app.services.auth_service import AuthInterface, AuthService
+from app.services.auth_service import auth_service
 from app.services.image_service import image_service
-from app.services.jwt_token_service import JWTTokenInterface, JWTTokenService
-from app.services.user_registration_service import UserRegistrationService
+from app.services.jwt_token_service import jwt_token_service
+from app.services.user_registration_service import user_registration_service
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -47,7 +49,8 @@ def register(
     email: str = Form(...),
     password: str = Form(..., min_length=6),
     avatar: UploadFile = File(default=None),
-    auth_service: AuthInterface = Depends(AuthService),
+    db: Session = Depends(get_db),
+    background_task: BackgroundTasks = BackgroundTasks(),
 ):
     avatar_path = None
     if avatar:
@@ -61,16 +64,16 @@ def register(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=EMAIL_INVALID_MESSAGE,
         )
-    user = auth_service.registration(create_user_request=create_user_request)
+    user = auth_service.registration(db, create_user_request, background_task)
     return user
 
 
 @router.post("/login", response_model=LoginResponse, status_code=status.HTTP_200_OK)
 def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    auth_service: AuthInterface = Depends(AuthService),
+    db: Session = Depends(get_db),
 ):
-    tokens = auth_service.login(form_data.username, form_data.password)
+    tokens = auth_service.login(db, form_data.username, form_data.password)
     response = JSONResponse({"msg": LOGGED_IN_MESSAGE, "user": tokens["user"]})
     response.set_cookie(
         key="access_token",
@@ -102,9 +105,9 @@ def profile(user: dict = Depends(get_current_user)):
 def update_profile(
     profile_update_request: ProfileUpdateRequest,
     user: dict = Depends(get_current_user),
-    auth_service: AuthInterface = Depends(AuthService),
+    db: Session = Depends(get_db),
 ):
-    updated_user = auth_service.profile_update(user["id"], profile_update_request)
+    updated_user = auth_service.profile_update(db, user["id"], profile_update_request)
     return updated_user
 
 
@@ -114,13 +117,12 @@ def update_profile(
     status_code=status.HTTP_200_OK,
 )
 def send_verify_email(
+    db: Session = Depends(get_db),
     user: dict = Depends(get_current_user),
-    user_registration_service: UserRegistrationInterface = Depends(
-        UserRegistrationService
-    ),
+    background_task: BackgroundTasks = BackgroundTasks(),
 ):
     response = user_registration_service.send_verification_mail(
-        user["username"], user["id"]
+        db, user["username"], user["id"], background_task
     )
     return response
 
@@ -129,20 +131,18 @@ def send_verify_email(
 def verify_email(
     token: str,
     request: Request,
-    user_registration_service: UserRegistrationInterface = Depends(
-        UserRegistrationService
-    ),
+    db: Session = Depends(get_db),
 ):
-    template = user_registration_service.verify_email(token, request)
+    template = user_registration_service.verify_email(db, token, request)
     return template
 
 
 @router.post("/refresh_token", status_code=status.HTTP_200_OK)
 def refresh_token(
-    jwt_token_service: JWTTokenInterface = Depends(JWTTokenService),
     refresh_token: str = Cookie(None),
+    db: Session = Depends(get_db),
 ):
-    access_token = jwt_token_service.refresh_token(refresh_token)
+    access_token = jwt_token_service.refresh_token(db, refresh_token)
     response = JSONResponse({"message": TOKEN_REFRESH_MESSAGE})
     response.set_cookie(
         key="access_token", value=access_token, httponly=True, secure=True
@@ -157,11 +157,12 @@ def refresh_token(
 )
 def password_reset_link(
     email: Annotated[str, Form()],
-    user_registration_service: UserRegistrationInterface = Depends(
-        UserRegistrationService
-    ),
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
 ):
-    response = user_registration_service.send_reset_password_link(email)
+    response = user_registration_service.send_reset_password_link(
+        db, email, background_tasks
+    )
     return response
 
 
@@ -169,11 +170,9 @@ def password_reset_link(
 def password_reset(
     token: str,
     new_password: Annotated[str, Form()],
-    user_registration_service: UserRegistrationInterface = Depends(
-        UserRegistrationService
-    ),
+    db: Session = Depends(get_db),
 ):
-    user_registration_service.reset_password(token, new_password)
+    user_registration_service.reset_password(db, token, new_password)
     response = JSONResponse({"message": PASSWORD_RESET_MESSAGE})
     response.delete_cookie(
         key="access_token", samesite="none", secure=True, httponly=True
@@ -189,11 +188,9 @@ def change_password(
     old_password: Annotated[str, Form()],
     new_password: Annotated[str, Form()],
     user: dict = Depends(get_current_user),
-    user_registration_service: UserRegistrationInterface = Depends(
-        UserRegistrationService
-    ),
+    db: Session = Depends(get_db),
 ):
-    user_registration_service.change_password(new_password, old_password, user)
+    user_registration_service.change_password(db, new_password, old_password, user)
     response = JSONResponse({"message": PASSWORD_RESET_MESSAGE})
     response.delete_cookie(
         key="access_token", samesite="none", secure=True, httponly=True
@@ -209,6 +206,6 @@ def logout(
     user: dict = Depends(get_current_user),
     access_token: str = Cookie(None),
     refresh_token: str = Cookie(None),
-    auth_service: AuthInterface = Depends(AuthService),
+    db: Session = Depends(get_db),
 ):
-    return auth_service.logout(user["id"], access_token, refresh_token)
+    return auth_service.logout(db, user["id"], access_token, refresh_token)

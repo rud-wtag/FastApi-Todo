@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import timedelta
 
+from sqlalchemy.orm import Session
+
 from app.core.constants import ACCESS_TOKEN
 
 
@@ -9,13 +11,18 @@ class JWTTokenInterface(ABC):
 
     @abstractmethod
     def create_token(
-        self, email: str, id: int, validity: timedelta, type: str = ACCESS_TOKEN
+        self,
+        db: Session,
+        email: str,
+        id: int,
+        validity: timedelta,
+        type: str = ACCESS_TOKEN,
     ):
         """Registration function that will implement child class"""
         pass
 
     @abstractmethod
-    def verify_token(self, token: str):
+    def verify_token(self, db: Session, token: str):
         """Verify the access token from different perspective,
           - Is valid signature
           - Is valid expires
@@ -33,7 +40,7 @@ class JWTTokenInterface(ABC):
         pass
 
     @abstractmethod
-    def refresh_token(self, refresh_token: str) -> dict | bool:
+    def refresh_token(self, db: Session, refresh_token: str) -> dict | bool:
         """
         Verify refresh token and return a access token
 
@@ -45,7 +52,7 @@ class JWTTokenInterface(ABC):
         """
 
     @abstractmethod
-    def blacklist_token(self, user_id: int, token: str) -> bool:
+    def blacklist_token(self, db: Session, user_id: int, token: str) -> bool:
         """
         black access token when user logged out
 

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 from app.core.constants import (
     USER_ACTIVATED_MESSAGE,
@@ -6,20 +7,20 @@ from app.core.constants import (
     USER_NOT_FOUND_MESSAGE,
 )
 from app.core.dependencies import admin, get_current_user
-from app.interface.user_interface import UserInterface
+from app.db.database import get_db
 from app.models.user import User
 from app.schema.auth_schema import FullUserResponse
 from app.schema.response_schema import SuccessResponse
-from app.services.user_service import UserService
+from app.services.user_service import user_service
 
 router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(admin)])
 
 
 @router.get("", response_model=list[FullUserResponse], status_code=status.HTTP_200_OK)
 def get_all_users(
-    user_service: UserInterface = Depends(UserService),
+    db: Session = Depends(get_db),
 ) -> list[FullUserResponse]:
-    users = user_service.get_all_users()
+    users = user_service.get_all_users(db)
     return users
 
 
@@ -28,9 +29,9 @@ def get_all_users(
 )
 def get_user(
     user_id: int,
-    user_service: UserInterface = Depends(UserService),
+    db: Session = Depends(get_db),
 ) -> FullUserResponse:
-    user = user_service.get_user(user_id)
+    user = user_service.get_user(db, user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=USER_NOT_FOUND_MESSAGE
@@ -45,9 +46,9 @@ def get_user(
 )
 def activate_user(
     user_id: int,
-    user_service: UserInterface = Depends(UserService),
+    db: Session = Depends(get_db),
 ) -> SuccessResponse:
-    success = user_service.activate_user(user_id)
+    success = user_service.activate_user(db, user_id)
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=USER_NOT_FOUND_MESSAGE
@@ -62,9 +63,9 @@ def activate_user(
 )
 def deactivate_user(
     user_id: int,
-    user_service: UserInterface = Depends(UserService),
+    db: Session = Depends(get_db),
 ) -> SuccessResponse:
-    success = user_service.deactivate_user(user_id)
+    success = user_service.deactivate_user(db, user_id)
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=USER_NOT_FOUND_MESSAGE
@@ -78,6 +79,6 @@ def deactivate_user(
 def delete_user(
     user_id: int,
     current_user: User = Depends(get_current_user),
-    user_service: UserInterface = Depends(UserService),
+    db: Session = Depends(get_db),
 ):
-    return user_service.delete_user(user_id, current_user)
+    return user_service.delete_user(db, user_id, current_user)

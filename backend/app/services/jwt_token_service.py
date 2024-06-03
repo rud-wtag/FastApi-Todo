@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from jose import JWTError, jwt
 from jose.exceptions import ExpiredSignatureError
 from sqlalchemy.orm import Session
@@ -13,7 +13,6 @@ from app.core.constants import (
     USER_NOT_FOUND_MESSAGE,
 )
 from app.db.crud import CRUDBase
-from app.db.database import get_db
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.models.token import Token
 from app.models.user import User
@@ -23,29 +22,29 @@ from app.utils.helpers import decode_token
 
 
 class JWTTokenService(JWTTokenInterface, CRUDBase):
-    def __init__(self, db: Session = Depends(get_db)):
-        self.db = db
+    def __init__(self):
         super().__init__(model=Token)
         self.user_crud = CRUDBase(model=User)
 
-    def store_token(self, user_id: int, token: str):
+    def store_token(self, db: Session, user_id: int, token: str):
         token_create_data = TokenCreate(user_id=user_id, token=token)
-        return self.create(db=self.db, obj_in=token_create_data)
+        return self.create(db=db, obj_in=token_create_data)
 
-    def blacklist_token(self, user_id: int, token: str) -> bool:
-        token_model = self.get_by_fields(self.db, {"user_id": user_id, "token": token})
+    def blacklist_token(self, db: Session, user_id: int, token: str) -> bool:
+        token_model = self.get_by_fields(db, {"user_id": user_id, "token": token})
         if token_model:
             return self.update(
-                db=self.db, obj_in=TokenUpdate(status=False), id=token_model.id
+                db=db, obj_in=TokenUpdate(status=False), id=token_model.id
             )
         return False
 
-    def is_blacklist_token(self, user_id: int, token: str) -> bool:
-        token_model = self.get_by_fields(self.db, {"user_id": user_id, "token": token})
+    def is_blacklist_token(self, db: Session, user_id: int, token: str) -> bool:
+        token_model = self.get_by_fields(db, {"user_id": user_id, "token": token})
         return token_model and not token_model.status
 
     def create_token(
         self,
+        db: Session,
         email: str,
         id: int,
         validity: timedelta,
@@ -58,10 +57,10 @@ class JWTTokenService(JWTTokenInterface, CRUDBase):
         token = jwt.encode(
             encode, settings.app.secret_key, algorithm=settings.app.algorithm
         )
-        self.store_token(id, token)
+        self.store_token(db, id, token)
         return token
 
-    def verify_token(self, token: str):
+    def verify_token(self, db: Session, token: str):
         try:
             payload = decode_token(token)
             username = payload.get("sub")
@@ -86,13 +85,13 @@ class JWTTokenService(JWTTokenInterface, CRUDBase):
                 detail=UNAUTHORIZE_MESSAGE,
             )
 
-        if self.is_blacklist_token(user_id, token):
+        if self.is_blacklist_token(db, user_id, token):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=UNAUTHORIZE_MESSAGE,
             )
 
-        user = self.user_crud.get(self.db, user_id)
+        user = self.user_crud.get(db, user_id)
 
         if not user:
             raise HTTPException(
@@ -111,8 +110,8 @@ class JWTTokenService(JWTTokenInterface, CRUDBase):
             "token_type": token_type,
         }
 
-    def refresh_token(self, refresh_token: str) -> str | bool:
-        token_details = self.verify_token(refresh_token)
+    def refresh_token(self, db: Session, refresh_token: str) -> str | bool:
+        token_details = self.verify_token(db, refresh_token)
 
         if token_details is None:
             raise HTTPException(
@@ -120,6 +119,7 @@ class JWTTokenService(JWTTokenInterface, CRUDBase):
                 detail=UNAUTHORIZE_MESSAGE,
             )
         access_token = self.create_token(
+            db,
             token_details["username"],
             token_details["id"],
             timedelta(days=settings.app.access_token_validity),

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import pytz
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_utilities import repeat_at
 from sqlalchemy import and_, create_engine
@@ -12,7 +12,6 @@ from app.core.config import settings
 from app.core.constants import ADMIN, TASK_DELETED_MESSAGE, TASK_NOT_FOUND
 from app.core.mail import mail
 from app.db.crud import CRUDBase
-from app.db.database import get_db
 from app.logger import logger
 from app.models.task import Task
 from app.models.user import User
@@ -22,19 +21,26 @@ from app.schema.task_schema import TaskCreateRequest, TaskUpdateRequest
 class TaskService(CRUDBase):
     def __init__(
         self,
-        db: Session = Depends(get_db),
         background_tasks: BackgroundTasks = BackgroundTasks(),
     ):
-        self.db = db
         self.background_tasks = background_tasks
         super().__init__(model=Task)
 
-    def create_task(self, user: dict, create_task_request: TaskCreateRequest):
+    def create_task(
+        self, db: Session, user: dict, create_task_request: TaskCreateRequest
+    ):
         create_task_request.user_id = user["id"]
-        return self.create(db=self.db, obj_in=create_task_request)
+        return self.create(db=db, obj_in=create_task_request)
 
     def get_all_tasks(
-        self, search_query, category, priority_level, due_date, status, user: dict
+        self,
+        db: Session,
+        search_query,
+        category,
+        priority_level,
+        due_date,
+        status,
+        user: dict,
     ):
         filters = []
 
@@ -55,15 +61,15 @@ class TaskService(CRUDBase):
             if value:
                 filters.append(condition)
 
-        tasks = self.db.query(Task).filter(and_(*filters))
+        tasks = db.query(Task).filter(and_(*filters))
 
-        return paginate(self.db, tasks.order_by(Task.created_at.desc()))
+        return paginate(db, tasks.order_by(Task.created_at.desc()))
 
-    def get_all_tasks_by_user(self, user: dict):
-        return self.get_multi_by_field(self.db, "user_id", user[id])
+    def get_all_tasks_by_user(self, db: Session, user: dict):
+        return self.get_multi_by_field(db, "user_id", user[id])
 
-    def get_task_by_id(self, user: dict, task_id: int):
-        task = self.db.query(Task).filter(Task.id == task_id)
+    def get_task_by_id(self, db: Session, user: dict, task_id: int):
+        task = db.query(Task).filter(Task.id == task_id)
         if user["role"] != ADMIN:
             task = task.filter(Task.user_id == user["id"])
         task = task.first()
@@ -74,26 +80,30 @@ class TaskService(CRUDBase):
         return task
 
     def update_task(
-        self, user: dict, task_id: int, task_update_request: TaskUpdateRequest
+        self,
+        db: Session,
+        user: dict,
+        task_id: int,
+        task_update_request: TaskUpdateRequest,
     ):
-        task = self.get_task_by_id(user, task_id)
-        return self.update(db=self.db, obj_in=task_update_request, id=task.id)
+        task = self.get_task_by_id(db, user, task_id)
+        return self.update(db=db, obj_in=task_update_request, id=task.id)
 
-    def delete_task(self, user: dict, task_id: int):
-        task = self.get_task_by_id(user, task_id)
-        self.remove(db=self.db, id=task.id)
+    def delete_task(self, db: Session, user: dict, task_id: int):
+        task = self.get_task_by_id(db, user, task_id)
+        self.remove(db=db, id=task.id)
         return {"message": TASK_DELETED_MESSAGE}
 
-    def mark_as_complete(self, task_id: int, user: dict):
-        task = self.get_task_by_id(user, task_id)
+    def mark_as_complete(self, db: Session, task_id: int, user: dict):
+        task = self.get_task_by_id(db, user, task_id)
         update_data = {"status": True, "completed_at": datetime.now()}
-        task = self.update(db=self.db, obj_in=update_data, id=task.id)
+        task = self.update(db=db, obj_in=update_data, id=task.id)
         return task
 
-    def mark_as_incomplete(self, task_id: int, user: dict):
-        task = self.get_task_by_id(user, task_id)
+    def mark_as_incomplete(self, db: Session, task_id: int, user: dict):
+        task = self.get_task_by_id(db, user, task_id)
         update_data = {"status": False, "completed_at": None}
-        task = self.update(db=self.db, obj_in=update_data, id=task.id)
+        task = self.update(db=db, obj_in=update_data, id=task.id)
         return task
 
     # @repeat_at(cron="*/1 * * * *")
@@ -132,3 +142,6 @@ class TaskService(CRUDBase):
             logger.info(f"Remainder sent to task owner -> {task.id}")
         except Exception as e:
             logger.exception(e)
+
+
+task_service = TaskService()

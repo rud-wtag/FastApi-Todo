@@ -2,6 +2,7 @@ from typing import Annotated, Optional
 
 from fastapi import Cookie, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm import Session
 
 from app.core.constants import (
     ADMIN,
@@ -9,6 +10,7 @@ from app.core.constants import (
     UNAUTHORIZE_MESSAGE,
     USER,
 )
+from app.db.database import get_db
 from app.interface.jwt_token_interface import JWTTokenInterface
 from app.services.jwt_token_service import JWTTokenService
 
@@ -18,12 +20,13 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl="api/v1/login")
 def get_current_user(
     access_token: Annotated[Optional[str], Cookie()] = None,
     jwt_token_service: JWTTokenInterface = Depends(JWTTokenService),
+    db: Session = Depends(get_db),
 ) -> dict:
     if not access_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=UNAUTHORIZE_MESSAGE
         )
-    user = jwt_token_service.verify_token(access_token)
+    user = jwt_token_service.verify_token(db, access_token)
 
     return user
 
