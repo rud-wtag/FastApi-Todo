@@ -113,7 +113,7 @@ class UserRegistrationService(UserRegistrationInterface, CRUDBase):
             raise HTTPException(status.HTTP_404_NOT_FOUND, USER_NOT_FOUND_MESSAGE)
 
         if user and user["token_type"] in (RESET_PASSWORD_TOKEN, ACCESS_TOKEN):
-            user_model = db.query(User).filter(User.id == user["id"]).first()
+            user_model = self.get(db, user["id"])
 
             if user_model:
                 user_model.password = get_hashed_password(new_password)

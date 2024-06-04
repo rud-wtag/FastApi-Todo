@@ -33,7 +33,7 @@ class AuthService(AuthInterface, CRUDBase):
         super().__init__(model=User)
 
     def save_role(self, db: Session, user_role: str = GUEST):
-        self.role_crud.create(db, RoleCreate(user_role))
+        self.role_crud.create(db=db, obj_in=RoleCreate(user_role))
 
     def registration(
         self,
@@ -121,8 +121,8 @@ class AuthService(AuthInterface, CRUDBase):
         response.delete_cookie(
             key="refresh_token", samesite="none", secure=True, httponly=True
         )
-        jwt_token_service.blacklist_token(user_id, access_token)
-        jwt_token_service.blacklist_token(user_id, refresh_token)
+        jwt_token_service.blacklist_token(db, user_id, access_token)
+        jwt_token_service.blacklist_token(db, user_id, refresh_token)
         return response
 
 
