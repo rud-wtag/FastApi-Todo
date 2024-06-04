@@ -17,7 +17,7 @@ def test_create_task(client, insert_user_data):
 
     response = client.post("/api/v1/tasks", json=TASK)
     logger.info(response)
-    assert response.status_code == 200
+    assert response.status_code == 201
     response_data = response.json()
     response_data.pop("created_at", None)
     response_data.pop("updated_at", None)
@@ -27,6 +27,7 @@ def test_create_task(client, insert_user_data):
         "user_id": 1,
         "category": "Work",
         "status": False,
+        "task_state": "incomplete",
         "due_date": "2024-06-15T00:00:00",
         "id": 1,
         "priority_level": "LOW",

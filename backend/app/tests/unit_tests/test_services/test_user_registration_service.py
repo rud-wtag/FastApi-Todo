@@ -10,14 +10,14 @@ from app.core.constants import (
     ACCESS_TOKEN,
     ADMIN,
     EMAIL_ALREADY_VERIFIED_MESSAGE,
+    EMAIL_VERIFICATION_MAIL_SENT_MESSAGE,
     EMAIL_VERIFICATION_TOKEN,
     EMAIL_VERIFIED_MESSAGE,
     PASSWORD_RESET_MESSAGE,
     RESET_PASSWORD_TOKEN,
 )
 from app.models.user import User
-from app.services.jwt_token_service import JWTTokenService
-from app.services.user_registration_service import UserRegistrationService
+from app.services.user_registration_service import user_registration_service
 
 
 class TestUserRegistrationService:
@@ -33,32 +33,28 @@ class TestUserRegistrationService:
         self.background_task = BackgroundTasks()
 
     @freeze_time("2024-01-1")
-    @patch("app.services.user_registration_service.User")
     @patch("app.services.user_registration_service.mail")
+    @patch("app.services.user_registration_service.jwt_token_service")
+    @patch("app.db.crud.CRUDBase.get")
     def test_send_verification_mail(
         self,
+        mock_crud_base,
+        mock_jwt_token_service,
         mock_mail_service,
-        mock_user_class,
         mock_db_session,
     ):
-        mock_jwt_token_service = MagicMock(JWTTokenService)
-        user_registration_service = UserRegistrationService(
-            db=mock_db_session,
-            jwt_token_service=mock_jwt_token_service,
-            background_tasks=self.background_task,
-        )
         mock_user = User(**self.user)
-        mock_user_class.return_value = mock_user
-        mock_db_session.query().filter().first.return_value = mock_user
-        mock_db_session.commit.return_value = self.user
+        mock_crud_base.return_value = mock_user
+
         mock_jwt_token_service.create_token.return_value = self.token
         url = f"{settings.app.host}/api/v1/auth/verify-email?token={self.token}"
 
-        user_registration_service.send_verification_mail(
-            self.user["email"], self.user["id"]
+        response = user_registration_service.send_verification_mail(
+            mock_db_session, self.user["email"], self.user["id"], self.background_task
         )
 
         mock_jwt_token_service.create_token.assert_called_with(
+            mock_db_session,
             self.user["email"],
             self.user["id"],
             timedelta(minutes=30),
@@ -72,43 +68,45 @@ class TestUserRegistrationService:
             template_body={"url": url, "email": self.user["email"]},
             template_name="email-verification.html",
         )
+        mock_crud_base.assert_called_once_with(mock_db_session, self.user["id"])
+        assert response == {"message": EMAIL_VERIFICATION_MAIL_SENT_MESSAGE}
 
-    @patch("app.services.user_registration_service.User")
     @patch("app.services.user_registration_service.get_html")
+    @patch("app.db.crud.CRUDBase.get")
+    @patch("app.services.user_registration_service.jwt_token_service")
     def test_verify_email(
         self,
+        mock_jwt_token_service,
+        mock_crud_base,
         mock_get_html,
-        mock_user_class,
         mock_db_session,
     ):
-        mock_jwt_token_service = MagicMock(JWTTokenService)
-        user_registration_service = UserRegistrationService(
-            db=mock_db_session,
-            jwt_token_service=mock_jwt_token_service,
-            background_tasks=self.background_task,
-        )
         mock_user = User(**self.user)
-        mock_user_class.return_value = mock_user
-        mock_db_session.query().filter().first.return_value = mock_user
+        mock_crud_base.return_value = mock_user
         mock_jwt_token_service.verify_token.return_value = {
             "id": self.user["id"],
             "token_type": EMAIL_VERIFICATION_TOKEN,
         }
         request = MagicMock(spec=Request)
 
-        reponse = user_registration_service.verify_email(self.token, request)
+        user_registration_service.verify_email(
+            mock_db_session, self.token, request
+        )
 
-        mock_db_session.query.assert_called_with(mock_user_class)
+        mock_db_session.commit.assert_called
+        mock_db_session.refresh.assert_called_with(mock_user)
         # mock_db_session.query().filter.assert_called_with(User.id == self.user['id'])
         mock_get_html.assert_called_once
         mock_get_html().TemplateResponse.assert_called_once_with(
             "email-verification-success.html",
             {"request": request, "msg": EMAIL_VERIFIED_MESSAGE},
         )
+        mock_user.is_email_verified = True
+        mock_crud_base.return_value = mock_user
 
-        mock_user_class.is_email_verified.return_value = True
-
-        reponse = user_registration_service.verify_email(self.token, request)
+        user_registration_service.verify_email(
+            mock_db_session, self.token, request
+        )
 
         mock_get_html().TemplateResponse.assert_called_with(
             "email-verification-success.html",
@@ -116,30 +114,27 @@ class TestUserRegistrationService:
         )
 
     @freeze_time("2024-01-1")
-    @patch("app.services.user_registration_service.User")
+    @patch("app.services.user_registration_service.jwt_token_service")
     @patch("app.services.user_registration_service.mail")
+    @patch("app.db.crud.CRUDBase.get_by_field")
     def test_send_reset_password_link(
         self,
+        mock_crud_base,
         mock_mail_service,
-        mock_user_class,
+        mock_jwt_token_service,
         mock_db_session,
     ):
-        mock_jwt_token_service = MagicMock(JWTTokenService)
-        user_registration_service = UserRegistrationService(
-            db=mock_db_session,
-            jwt_token_service=mock_jwt_token_service,
-            background_tasks=self.background_task,
-        )
         mock_user = User(**self.user)
-        mock_user_class.return_value = mock_user
-        mock_db_session.query().filter().first.return_value = mock_user
-        mock_db_session.commit.return_value = self.user
+        mock_crud_base.return_value = mock_user
         mock_jwt_token_service.create_token.return_value = self.token
         url = f"{settings.app.frontend_url}/reset-password?token={self.token}"
 
-        user_registration_service.send_reset_password_link(self.user["email"])
+        user_registration_service.send_reset_password_link(
+            mock_db_session, self.user["email"], self.background_task
+        )
 
         mock_jwt_token_service.create_token.assert_called_once_with(
+            mock_db_session,
             self.user["email"],
             self.user["id"],
             timedelta(minutes=30),
@@ -154,75 +149,68 @@ class TestUserRegistrationService:
             template_name="forget-password.html",
         )
 
-    @patch("app.services.user_registration_service.User")
+    @patch("app.services.user_registration_service.jwt_token_service")
     @patch("app.services.user_registration_service.get_hashed_password")
+    @patch("app.db.crud.CRUDBase.get")
     def test_reset_password(
         self,
+        mock_crud_base,
         mock_get_hashed_password,
-        mock_user_class,
+        mock_jwt_token_service,
         mock_db_session,
     ):
-        mock_jwt_token_service = MagicMock(JWTTokenService)
-        user_registration_service = UserRegistrationService(
-            db=mock_db_session,
-            jwt_token_service=mock_jwt_token_service,
-            background_tasks=self.background_task,
-        )
         mock_user = User(**self.user)
-        mock_user_class.return_value = mock_user
-        mock_db_session.query().filter().first.return_value = mock_user
+        mock_crud_base.return_value = mock_user
         mock_jwt_token_service.verify_token.return_value = {
             "id": self.user["id"],
             "token_type": RESET_PASSWORD_TOKEN,
         }
 
-        response = user_registration_service.reset_password(self.token, "new_password")
+        response = user_registration_service.reset_password(
+            mock_db_session, self.token, "new_password"
+        )
 
-        mock_db_session.query.assert_called_with(mock_user_class)
         mock_get_hashed_password.assert_called_with("new_password")
         mock_db_session.commit.assert_called_once
         mock_db_session.refresh.assert_called_once
         mock_jwt_token_service.blacklist_token.assert_called_with(
-            self.user["id"], self.token
+            mock_db_session, self.user["id"], self.token
         )
         assert response == {"message": PASSWORD_RESET_MESSAGE}
 
-    @patch("app.services.user_registration_service.User")
+    @patch("app.services.user_registration_service.jwt_token_service")
     @patch("app.services.user_registration_service.get_hashed_password")
     @patch("app.services.user_registration_service.verify_password")
+    @patch("app.db.crud.CRUDBase.get")
     def test_change_password(
         self,
+        mock_crud_base,
         mock_verify_password,
         mock_get_hashed_password,
-        mock_user_class,
+        mock_jwt_token_service,
         mock_db_session,
     ):
-        mock_jwt_token_service = MagicMock(JWTTokenService)
-        user_registration_service = UserRegistrationService(
-            db=mock_db_session,
-            jwt_token_service=mock_jwt_token_service,
-            background_tasks=self.background_task,
-        )
         mock_user = User(**self.user)
         mock_user.password = "old_password"
-        mock_user_class.return_value = mock_user
+        mock_crud_base.return_value = mock_user
         mock_db_session.query().filter().first.return_value = mock_user
         mock_jwt_token_service.verify_token.return_value = {
             "id": self.user["id"],
             "token_type": ACCESS_TOKEN,
         }
-        mock_user_class.password.return_value = "old_password"
+
+        mock_user.password = "old_password"
 
         response = user_registration_service.change_password(
+            mock_db_session,
             "new_password",
             "old_password",
             {"id": self.user["id"], "token_type": ACCESS_TOKEN},
         )
 
-        mock_db_session.query.assert_called_with(mock_user_class)
         mock_verify_password.assert_called_with("old_password", "old_password")
         mock_get_hashed_password.assert_called_with("new_password")
-        mock_db_session.commit.assert_called_once
-        mock_db_session.refresh.assert_called_once_with(mock_user)
+        mock_crud_base.assert_called_once
+        mock_crud_base.assert_called_once_with(mock_db_session, self.user["id"])
 
-        assert response == True
+        assert response is True
