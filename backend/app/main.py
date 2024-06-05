@@ -4,7 +4,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi_pagination import add_pagination
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api.v1.endpoints.task import lifespan
 from app.api.v1.routes import routers

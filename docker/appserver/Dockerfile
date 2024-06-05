@@ -8,8 +8,10 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-  && apt -y install curl \
+    gcc \
   libpq-dev \
+  build-essential \
+  curl \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 

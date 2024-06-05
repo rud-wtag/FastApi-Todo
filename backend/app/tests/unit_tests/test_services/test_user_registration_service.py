@@ -89,9 +89,7 @@ class TestUserRegistrationService:
         }
         request = MagicMock(spec=Request)
 
-        user_registration_service.verify_email(
-            mock_db_session, self.token, request
-        )
+        user_registration_service.verify_email(mock_db_session, self.token, request)
 
         mock_db_session.commit.assert_called
         mock_db_session.refresh.assert_called_with(mock_user)
@@ -104,9 +102,7 @@ class TestUserRegistrationService:
         mock_user.is_email_verified = True
         mock_crud_base.return_value = mock_user
 
-        user_registration_service.verify_email(
-            mock_db_session, self.token, request
-        )
+        user_registration_service.verify_email(mock_db_session, self.token, request)
 
         mock_get_html().TemplateResponse.assert_called_with(
             "email-verification-success.html",

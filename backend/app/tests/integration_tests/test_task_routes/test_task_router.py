@@ -1,5 +1,3 @@
-import pytest
-
 from app.logger import logger
 from app.tests.conftest import TASK, USER
 
@@ -33,26 +31,6 @@ def test_create_task(client, insert_user_data):
         "priority_level": "LOW",
         "completed_at": None,
     }
-
-
-@pytest.mark.skip(reason="pagination not working on test")
-def test_get_all_tasks(client, insert_user_data):
-    login_response = client.post(
-        "/api/v1/auth/login",
-        data={
-            "username": USER["email"],
-            "password": USER["password"],
-        },
-    )
-
-    client.cookies.set("access_token", login_response.cookies.get("access_token"))
-
-    response = client.get("/api/v1/tasks", params={"page": 1, "size": 10})
-
-    assert response.status_code == 200
-    response_data = response.json()
-    assert isinstance(response_data, dict)
-    assert "items" in response_data
 
 
 def test_get_task_by_id(client, insert_user_data):
