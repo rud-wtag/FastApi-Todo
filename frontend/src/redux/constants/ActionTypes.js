@@ -7,7 +7,8 @@ export const actionTypes = {
   SET_EDIT: 'SET_EDIT',
   NEXT_PAGE: 'NEXT_PAGE',
   TOAST_MESSAGE: 'TOAST_MESSAGE',
-  LOAD_TASKS_FROM_DB: 'LOAD_TASKS_FROM_DB'
+  LOAD_TASKS_FROM_DB: 'LOAD_TASKS_FROM_DB',
+  SET_PAGER: 'SET_PAGER'
 };
 
 export const paginationActionTypes = {
@@ -16,6 +17,8 @@ export const paginationActionTypes = {
 
 export const filterActionTypes = {
   SET_FILTER: 'SET_FILTER',
+  SET_PRIORITY: 'SET_PRIORITY',
+  SET_DUE_DATE: 'SET_DUE_DATE',
   ALL: 'All',
   INCOMPLETE: 'Incomplete',
   COMPLETE: 'Complete'
@@ -24,4 +27,9 @@ export const filterActionTypes = {
 export const searchActionTypes = {
   SET_SEARCH: 'SET_SEARCH',
   SET_SEARCHING: 'SET_SEARCHING'
+};
+
+export const appActionTypes = {
+  SET_LOGGED_IN: 'SE_LOGGED_IN',
+  SET_PROFILE: 'SET_PROFILE'
 };

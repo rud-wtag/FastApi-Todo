@@ -1,30 +1,55 @@
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import EditTask from 'components/EditTask';
 import TaskFooter from 'components/ui/TaskFooter';
+import PropTypes from 'prop-types';
 import { getFormattedDate } from 'utils/helpers';
 
 function Task({ task }) {
-  const { id, title, createdAt, completedAt, isEditMode } = task;
+  const {
+    id,
+    title,
+    description,
+    created_at,
+    due_date,
+    priority_level,
+    category,
+    completed_at,
+    task_state,
+    isEditMode
+  } = task;
 
   return (
     <>
       {isEditMode ? (
         <EditTask task={task} />
       ) : (
-        <div className="task">
+        <div
+          className={classNames('task', {
+            'task--outdated': task_state === 'outdated'
+          })}
+        >
           <div
             className={classNames('task__title', {
-              'task__title--completed': completedAt
+              'task__title--completed': completed_at
             })}
           >
             {title}
           </div>
-          <p className="task__created">Created At: {getFormattedDate(createdAt)}</p>
+          <div
+            className={classNames({
+              'task__title--completed': completed_at
+            })}
+          >
+            {description}
+          </div>
+          <p className="task__created">Priority: {priority_level}</p>
+          <p className="task__created">Category: {category}</p>
+          <p className="task__created">Created At: {getFormattedDate(created_at)}</p>
+          <p className="task__created">Due date: {getFormattedDate(due_date)}</p>
           <TaskFooter
-            completedAt={completedAt}
+            completed_at={completed_at}
             isEditMode={isEditMode}
-            createdAt={createdAt}
+            created_at={created_at}
             taskId={id}
           />
         </div>
@@ -37,17 +62,22 @@ export default Task;
 
 Task.propTypes = {
   task: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    priority_level: PropTypes.string.isRequired,
+    category: PropTypes.string.isRequired,
+    task_state: PropTypes.string,
     isEditMode: PropTypes.bool,
-    createdAt: PropTypes.instanceOf(Date).isRequired,
-    completedAt: PropTypes.instanceOf(Date)
+    created_at: PropTypes.instanceOf(Date).isRequired,
+    due_date: PropTypes.instanceOf(Date).isRequired,
+    completed_at: PropTypes.instanceOf(Date)
   })
 };
 
 Task.defaultProps = {
   task: {
-    completedAt: null,
+    completed_at: null,
     isEditMode: false
   }
 };

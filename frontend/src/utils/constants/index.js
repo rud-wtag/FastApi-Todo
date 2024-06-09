@@ -14,7 +14,7 @@ export const TOAST_TYPE_ERROR = 'error';
 export const TASKS_PER_PAGE = 9;
 
 export const INITIAL_TASK = {
-  completedAt: null,
+  completed_at: null,
   isEditMode: false,
-  createdAt: null
+  created_at: null
 };

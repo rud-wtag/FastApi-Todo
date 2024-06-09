@@ -8,13 +8,16 @@ const {
   SET_EDIT,
   EDIT_TODO,
   TOAST_MESSAGE,
-  LOAD_TASKS_FROM_DB
+  LOAD_TASKS_FROM_DB,
+  SET_PAGER
 } = actionTypes;
 
 const initialState = {
   isNewTaskRequested: false,
   todos: [],
   currentPage: 1,
+  size: 5,
+  pages: 0,
   toast: {
     type: 'success',
     message: null
@@ -61,6 +64,9 @@ export const todoReducer = (state = initialState, action) => {
 
     case LOAD_TASKS_FROM_DB:
       return { ...state, todos: [...action.payload] };
+
+    case SET_PAGER:
+      return { ...state, currentPage: action.payload.page, pages: action.payload.pages };
 
     default:
       return state;

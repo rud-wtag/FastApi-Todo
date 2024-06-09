@@ -4,6 +4,9 @@
   border: 1px solid $border-color;
   padding: 0.9375rem;
   background: $color-white;
+  &--outdated {
+    background: rgb(255 0 0 / 1%);
+  }
 
   &__title {
     font-weight: 700;

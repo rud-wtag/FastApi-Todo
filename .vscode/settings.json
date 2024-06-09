@@ -1,17 +1,35 @@
 {
   "workbench.colorTheme": "Default Dark+",
 
-  "editor.fontSize": 14,
-
+  "editor.fontSize": 16,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
   "[python]": {
     "editor.tabSize": 4,
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
-    }
   },
-
-  "ruff.organizeImports": true,
-  "ruff.lint.args": ["--config=backend/.ruff.toml"]
+  "ruff.lint.args": ["--config=backend/.ruff.toml"],
+  "[javascript]": {
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": null
+  },
+  "[javascriptreact]": {
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": null
+  },
+  "javascript.validate.enable": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.tslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "eslint.alwaysShowStatus": true,
+  "eslint.options": {
+    "overrideConfigFile": ".eslintrc.json"
+  },
+  "emmet.triggerExpansionOnTab": true,
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  }
 }

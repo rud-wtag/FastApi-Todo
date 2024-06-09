@@ -28,7 +28,7 @@ class LoggingSettings:
     file: str = os.getenv("LOG_FILE", "app.log")
     format: str = os.getenv("LOG_FORMAT", "{time} - {level} - {message}")
     rotation: str = os.getenv("LOG_ROTATION", "100 MB")
-    retention: str = os.getenv("LOG_RENTATION", "30 days")
+    retention: str = os.getenv("LOG_RETENTION", "30 days")
     serialization: bool = is_truthy(os.getenv("LOG_SERIALIZATION", "false"))
 
 
@@ -51,13 +51,17 @@ class MailSettings:
 class AppSettings:
     env: str = os.getenv("APP_ENV", "local")
     host: str = os.getenv("APP_HOST")
+    frontend_url: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
     project_name: str = os.getenv("PROJECT_NAME", "Todo")
     project_version: str = os.getenv("PROJECT_VERSION", "1.0.0")
     secret_key: str = os.getenv("SECRET_KEY", "secret")
     algorithm: str = os.getenv("ALGORITHM")
+    access_token_validity: int = int(os.getenv("ACCESS_TOKEN_VALIDITY"))
+    refresh_token_validity: int = int(os.getenv("REFRESH_TOKEN_VALIDITY"))
     forget_password_link_expire_minutes: int = int(
         os.getenv("FORGET_PASSWORD_LINK_EXPIRE_MINUTES")
     )
+    asset_directory: str = os.getenv("ASSET_DIRECTORY")
 
 
 @dataclass
@@ -66,10 +70,10 @@ class CorsSettings:
         "http://localhost",
         "http://localhost:3000",
         "http://localhost:8080",
-        "http://localhost:8000",
+        "http://localhost:3001",
     ]
     methods = ["*"]
-    headers = ["*"]
+    headers = ["POST", "GET", "PUT", "PATCH"]
 
 
 @dataclass
