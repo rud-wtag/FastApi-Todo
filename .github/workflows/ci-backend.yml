@@ -1,0 +1,72 @@
+name: Backend Action
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    env:
+      APP_HOST: http://localhost:8000
+      APP_ENV: test
+      FRONTEND_URL: http://localhost:3001
+      ASSET_DIRECTORY: files
+
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: fastapi_db
+      DB_URL: "postgresql://admin:admin@db:5432/fastapi_db"
+
+      SECRET_KEY: Z2WHHvVXpJoTIslxIlaRpOSocdMetwe8
+      ALGORITHM: HS256
+      ACCESS_TOKEN_VALIDITY: 1
+      REFRESH_TOKEN_VALIDITY: 7
+
+      MAIL_FROM_NAME: admin@mail.com
+      FORGET_PASSWORD_LINK_EXPIRE_MINUTES: 10
+      FORGET_PASSWORD_URL: /reset-password
+
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_FROM: "test@email.com"
+      MAIL_PORT: 1025
+      MAIL_SERVER: smtp
+      MAIL_STARTTLS: False
+      MAIL_SSL_TLS: False
+      MAIL_DEBUG: True
+      USE_CREDENTIALS: False
+      VALIDATE_CERTS: False
+
+      LOG_LEVEL: INFO
+      LOG_FILE: "app.log"
+      LOG_SERIALIZATION: false
+      LOG_FORMAT: "{time} - {level} - {message}"
+      LOG_ROTATION: "100 MB"
+      LOG_RETENTION: "30 days"
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Update pip
+      run: python -m pip install --upgrade pip
+
+    - name: Install dependencies
+      run: pip install -r ./backend/requirements.txt
+
+    - name: Install pytest-cov
+      run: pip install pytest-cov
+
+    - name: Run tests with pytest
+      run: pytest --cov

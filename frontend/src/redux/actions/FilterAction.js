@@ -6,3 +6,17 @@ export const setFilter = (filterState) => {
     payload: filterState
   };
 };
+
+export const setPriority = (priority) => {
+  return {
+    type: filterActionTypes.SET_PRIORITY,
+    payload: priority
+  };
+};
+
+export const setDueDate = (dueDate) => {
+  return {
+    type: filterActionTypes.SET_DUE_DATE,
+    payload: dueDate
+  };
+};

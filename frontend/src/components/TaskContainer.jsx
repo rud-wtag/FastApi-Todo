@@ -1,29 +1,53 @@
-import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { Box } from '@mui/material';
+import Pagination from '@mui/material/Pagination';
+import axios from 'axios';
 import AddTask from 'components/AddTask';
 import NoTaskPlaceholder from 'components/NoTaskPlaceholder';
 import Task from 'components/Task';
-import Button from 'components/ui/Button';
-import { paginationLabel } from 'utils/helpers';
-import { nextPage, paginate, searchAndFilter } from 'utils/helpers/ReducerHelper';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { loadTasksFromDB, toast, setPager } from 'redux/actions/TodoAction';
+import { TOAST_TYPE_ERROR } from 'utils/constants';
+import { filterTasks } from 'utils/helpers/ReducerHelper';
 
 export default function TaskContainer() {
   const tasks = useSelector((state) => state.todoStates.todos);
-  const [todos, setTodos] = useState(tasks);
-  const filter = useSelector((state) => state.filterStates);
+  const pager = useSelector((state) => state.todoStates);
+  const filter = useSelector((state) => state.filterStates.filterState);
+  const priority = useSelector((state) => state.filterStates.priority);
+  const dueDate = useSelector((state) => state.filterStates.dueDate);
   const search = useSelector((state) => state.searchStates);
   const isNewTaskRequested = useSelector((state) => state.todoStates.isNewTaskRequested);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
   const isTasksAvailable = tasks.length || isNewTaskRequested;
-  const isPaginationAvailable = todos.length > 9;
+  const isPaginationAvailable = pager.pages > 0;
+  const dispatch = useDispatch();
 
-  function loadMore() {
-    setCurrentPage(nextPage(todos, currentPage));
-  }
+  const handleChange = (e, value) => {
+    e.preventDefault();
+    setPage(value);
+  };
 
   useEffect(() => {
-    setTodos(searchAndFilter(tasks, filter, search));
-  }, [tasks, filter, search, currentPage]);
+    axios
+      .get(
+        `/tasks?search_query=${search.query}&page=${page}&size=${pager.size}${
+          filterTasks(filter) != null ? `&status=${filterTasks(filter)}` : ``
+        }${priority != null ? `&priority_level=${priority}` : ``}${
+          dueDate != null ? `&due_date=${dueDate}` : ``
+        }`
+      )
+      .then((response) => {
+        if (response.status == 200) {
+          dispatch(loadTasksFromDB(response.data.items));
+          dispatch(setPager({ page: response.data.page, pages: response.data.pages }));
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatch(toast({ type: TOAST_TYPE_ERROR, message: 'Failed to update task' }));
+      });
+  }, [search, page, filter, priority, dueDate]);
 
   return (
     <>
@@ -31,21 +55,26 @@ export default function TaskContainer() {
       <div className="container">
         <div className="task_container grid grid-gap grid-cols-1 grid-cols-md-2 grid-cols-lg-3">
           {isNewTaskRequested && <AddTask />}
-          {paginate(todos, currentPage).map((task) => (
+          {tasks.map((task) => (
             <Task
               task={{
                 ...task,
-                createdAt: task.createdAt ? new Date(task.createdAt) : task.createdAt,
-                completedAt: task.completedAt ? new Date(task.completedAt) : task.completedAt
+                created_at: task.created_at ? new Date(task.created_at) : task.created_at,
+                completed_at: task.completed_at ? new Date(task.completed_at) : task.completed_at
               }}
               key={task.id}
             />
           ))}
         </div>
         {isPaginationAvailable && (
-          <Button className="btn btn-primary--dark task_container__more_btn" onClick={loadMore}>
-            {paginationLabel(todos, currentPage)}
-          </Button>
+          <Box sx={{ margin: '2rem 0', display: 'flex', justifyContent: 'center' }}>
+            <Pagination
+              count={pager.pages}
+              page={page}
+              onChange={(e, value) => handleChange(e, value)}
+              color="secondary"
+            />
+          </Box>
         )}
       </div>
     </>

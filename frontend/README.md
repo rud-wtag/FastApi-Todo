@@ -18,7 +18,6 @@ A todo project with react js and Redux state manangement.
 - [ ] Pagination
 - [ ] Searching
 - [ ] Filtering
-- [ ] Supabase
 - [ ] Testing
 
 ## Installation

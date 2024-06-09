@@ -9,10 +9,10 @@ export const deleteTask = (todos, payload) => {
 
 export const completeTask = (todos, payload) => {
   const newList = todos.map((todo) => {
-    if (todo.id === payload.taskId) {
+    if (todo.id === payload.id) {
       return {
         ...todo,
-        completedAt: payload.completedAt
+        ...payload
       };
     }
     return todo;
@@ -22,10 +22,10 @@ export const completeTask = (todos, payload) => {
 
 export const editTask = (todos, task) => {
   const newList = todos.map((todo) => {
-    if (todo.id === task.taskId) {
+    if (todo.id === task.id) {
       return {
         ...todo,
-        title: task.title
+        ...task
       };
     }
     return todo;
@@ -53,42 +53,15 @@ export const nextPage = (todos, currentPage) => {
   return 1;
 };
 
-const filterTasks = (tasks, filterState = ALL) => {
+export const filterTasks = (filterState = ALL) => {
   switch (filterState) {
     case ALL:
-      return tasks;
+      return null;
     case COMPLETE:
-      return tasks.filter((task) => {
-        if (task.completedAt !== null) return task;
-      });
+      return true;
     case INCOMPLETE:
-      return tasks.filter((task) => {
-        if (task.completedAt === null) return task;
-      });
+      return false;
     default:
-      return tasks;
+      return null;
   }
-};
-
-const searchTasks = (tasks, query) => {
-  return tasks.filter((task) => task.title.includes(query));
-};
-
-export const paginate = (tasks, currentPage) => {
-  const indexOfLastTask = currentPage * TASKS_PER_PAGE;
-
-  return tasks.slice(0, indexOfLastTask);
-};
-
-export const searchAndFilter = (tasks, filter, search) => {
-  let todos;
-
-  if (search.query) {
-    todos = searchTasks(tasks, search.query);
-  } else {
-    todos = tasks;
-  }
-
-  todos = filterTasks(todos, filter.filterState);
-  return todos;
 };
