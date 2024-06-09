@@ -35,7 +35,7 @@ class TestUserRegistrationService:
     @freeze_time("2024-01-1")
     @patch("app.services.user_registration_service.mail")
     @patch("app.services.user_registration_service.jwt_token_service")
-    @patch("app.db.crud.CRUDBase.get")
+    @patch("app.db.crud.CRUDBase.get_by_fields")
     def test_send_verification_mail(
         self,
         mock_crud_base,
@@ -68,7 +68,7 @@ class TestUserRegistrationService:
             template_body={"url": url, "email": self.user["email"]},
             template_name="email-verification.html",
         )
-        mock_crud_base.assert_called_once_with(mock_db_session, self.user["id"])
+        mock_crud_base.assert_called_once_with(mock_db_session, {"id": self.user["id"], "email":self.user['email']})
         assert response == {"message": EMAIL_VERIFICATION_MAIL_SENT_MESSAGE}
 
     @patch("app.services.user_registration_service.get_html")
